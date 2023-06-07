@@ -33,18 +33,86 @@ should not be used}
 \maketitle
 
 \begin{abstract}
-    This document is a model and instructions for \LaTeX.
-    This and the IEEEtran.cls file define the components of your paper [title, text, heads, etc.]. *CRITICAL: Do Not Use Symbols, Special Characters, Footnotes,
-    or Math in Paper Title or Abstract.
+    Street lights are a ubiquitous public infrastructure
+    in urban areas that can be leveraged for smart city applications.
+    In this paper, we present a demo of an electric vehicle (EV) charger
+    that is integrated with a street light and uses Wi-SUN network and OneM2M
+    middleware to communicate with other devices and services.
+    We demonstrate how street lights can be used as charging stations
+    for e-bikes that are for rent, making it easy for
+    e-bike rental companies to make charging stations across cities.
+    We also discuss the benefits and challenges of using street lights
+    as a platform for smart city applications.
+
 \end{abstract}
 
 \begin{IEEEkeywords}
-    component, formatting, style, styling, insert
+    street lights, smart city, EV charger, Wi-SUN, OneM2M
 \end{IEEEkeywords}
 
 \section{Introduction}
-This document is a model and instructions for \LaTeX.
-Please observe the conference page limits.
+Street lights are a basic and important facility of cities, illuminating
+roads and sidewalks to increase the safety and security of road users and
+pedestrians. However, street lights can also serve as a versatile and
+extensible platform for smart city applications, as they are electrically
+operated, densely deployed, and publicly owned 1. By augmenting
+treet lights with sensors, actuators, computing, networking, and
+Internet-of-Things (IoT) components, they can enable a wide range of
+innovative services and applications for the urban environment,
+uch as traffic monitoring, environmental sensing, digital signage,
+WiFi access, or e-vehicle charging.
+
+
+One of the promising applications of street lights is to use them as
+charging stations for electric vehicles (EVs), especially e-bikes that
+are becoming popular modes of transportation in cities. E-bikes are
+bicycles that have an electric motor that assists the rider's pedaling.
+They offer many benefits for urban mobility, such as reducing greenhouse
+gas emissions, improving health and fitness, saving time and money, and
+enhancing accessibility and convenience ³. However, one of the main
+challenges for e-bike users is to find available and reliable charging
+stations in the city. This is especially true for e-bike rental companies
+that need to manage a large fleet of e-bikes and ensure their availability
+and performance for customers.
+
+In this paper, we present a demo of an EV charger that is integrated with
+a street light and uses Wi-SUN network and OneM2M middleware to communicate
+with other devices and services. Wi-SUN is a wireless standard that
+provides machine-to-machine communication for large-scale IoT infrastructure.
+It uses IPv6-based mesh technology that allows end nodes to connect directly
+and dynamically to several nearby nodes to form the network[4].
+OneM2M is a global standard that defines an architectural framework based
+on a middleware technology that lies in the horizontal layer between IoT
+applications and a lower layer of communication networks and connected
+devices. The middleware layer provides a rich set of common services for
+data management, security, discovery, and interoperability  .
+
+We demonstrate how street lights can be used as charging stations for 
+e-bikes that are for rent, making it easy for e-bike rental companies to 
+make charging stations across cities. We also discuss the benefits and 
+challenges of using street lights as a platform for smart city applications. The main contributions of this paper are:
+
+\begin{enumerate}
+    \item We design and implement a prototype of an EV charger that is 
+integrated with a street light and uses Wi-SUN network and OneM2M 
+middleware.
+\item We show how the EV charger can interact with other devices and 
+services, such as e-bikes, smartphones, cloud servers, and payment systems, 
+to provide a seamless and convenient charging experience for users.
+\item We evaluate the performance and usability of the EV charger and 
+compare it with existing solutions.
+\item We identify the opportunities and challenges of using street lights 
+as a platform for smart city applications, such as scalability, security, 
+privacy, and governance.
+\end{enumerate}
+
+The rest of this paper is organized as follows. Section 2 reviews the 
+related work on street lights as a platform for smart city applications 
+and EV charging. Section 3 describes the design and implementation of the 
+EV charger prototype. Section 4 presents the demo scenario and the 
+evaluation results. Section 5 discusses the benefits and challenges of 
+using street lights as a platform for smart city applications. Section 6 
+concludes the paper and outlines future work.
 
 \section{Ease of Use}
 
@@ -248,10 +316,10 @@ For papers published in translation journals, please give the English
 citation first, followed by the original foreign-language citation \cite{b6}.
 
 \begin{thebibliography}{00}
-    \bibitem{b1} G. Eason, B. Noble, and I. N. Sneddon, ``On certain integrals of Lipschitz-Hankel type involving products of Bessel functions,'' Phil. Trans. Roy. Soc. London, vol. A247, pp. 529--551, April 1955.
-    \bibitem{b2} J. Clerk Maxwell, A Treatise on Electricity and Magnetism, 3rd ed., vol. 2. Oxford: Clarendon, 1892, pp.68--73.
-    \bibitem{b3} I. S. Jacobs and C. P. Bean, ``Fine particles, thin films and exchange anisotropy,'' in Magnetism, vol. III, G. T. Rado and H. Suhl, Eds. New York: Academic, 1963, pp. 271--350.
-    \bibitem{b4} K. Elissa, ``Title of paper if known,'' unpublished.
+    \bibitem{b1} https://github.com/SiliconLabs/wisun-br-linux
+    \bibitem{b2} https://www.silabs.com/documents/public/quick-start-guides/qsg181-wi-sun-sdk-quick-start-guide.pdf
+    \bibitem{b3} https://www.silabs.com/documents/public/user-guides/ug495-wi-sun-developers-guide.pdf
+    \bibitem{b4} https://docs.silabs.com/simplicity-studio-5-users-guide/1.0/about-the-simplicity-ide/overview/#project-explorer-view
     \bibitem{b5} R. Nicole, ``Title of paper with only first word capitalized,'' J. Name Stand. Abbrev., in press.
     \bibitem{b6} Y. Yorozu, M. Hirano, K. Oka, and Y. Tagawa, ``Electron spectroscopy studies on magneto-optical media and plastic substrate interface,'' IEEE Transl. J. Magn. Japan, vol. 2, pp. 740--741, August 1987 [Digests 9th Annual Conf. Magnetics Japan, p. 301, 1982].
     \bibitem{b7} M. Young, The Technical Writer's Handbook. Mill Valley, CA: University Science, 1989.

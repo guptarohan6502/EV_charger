@@ -1,10 +1,10 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 23.5) (preloaded format=pdflatex 2023.5.15)  3 JUN 2023 02:51
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 23.5) (preloaded format=pdflatex 2023.5.15)  6 JUN 2023 17:48
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
  %&-line parsing enabled.
-**"c:/Users/rohan/OneDrive - International Institute of Information Technology (1)/summer'23/Paper/Paper/paper.tex"
-(c:/Users/rohan/OneDrive - International Institute of Information Technology (1)/summer'23/Paper/Paper/paper.tex
+**"c:/Users/rohan/OneDrive - International Institute of Information Technology (1)/summer'23/Submission/EV_charger/Paper/paper.tex"
+(c:/Users/rohan/OneDrive - International Institute of Information Technology (1)/summer'23/Submission/EV_charger/Paper/paper.tex
 LaTeX2e <2022-11-01> patch level 1
 L3 programming layer <2023-05-11> (C:\Users\rohan\AppData\Local\Programs\MiKTeX\tex/latex/ieeetran\IEEEtran.cls
 Document Class: IEEEtran 2015/08/26 V1.8b by Michael Shell
@@ -283,19 +283,98 @@ LaTeX Font Info:    Trying to load font information for U+msb on input line 33.
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
 LaTeX Font Info:    Calculating math sizes for size <11> on input line 33.
-LaTeX Font Info:    Trying to load font information for OT1+pcr on input line 103.
- (C:\Users\rohan\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ot1pcr.fd
-File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
+LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 72.
+ (C:\Users\rohan\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ts1ptm.fd
+File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
 ) [2
 
 ]
-LaTeX Font Info:    Trying to load font information for OMS+ptm on input line 218.
- (C:\Users\rohan\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\omsptm.fd
+
+LaTeX Warning: Reference `AA' on page 3 undefined on input line 132.
+
+
+LaTeX Warning: Reference `SCM' on page 3 undefined on input line 132.
+
+
+LaTeX Warning: Reference `eq' on page 3 undefined on input line 166.
+
+
+LaTeX Warning: Reference `eq' on page 3 undefined on input line 166.
+
+
+LaTeX Warning: Reference `eq' on page 3 undefined on input line 166.
+
+
+LaTeX Warning: Reference `eq' on page 3 undefined on input line 167.
+
+LaTeX Font Info:    Trying to load font information for OT1+pcr on input line 171.
+(C:\Users\rohan\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ot1pcr.fd
+File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
+) [3]
+
+LaTeX Warning: Citation `b7' on page 4 undefined on input line 220.
+
+
+LaTeX Warning: Reference `fig' on page 4 undefined on input line 256.
+
+LaTeX Font Info:    Trying to load font information for OMS+ptm on input line 286.
+(C:\Users\rohan\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\omsptm.fd
 File: omsptm.fd 
 )
 LaTeX Font Info:    Font shape `OMS/ptm/m/n' in size <10> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 218.
- [3]
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 286.
+
+
+LaTeX Warning: Citation `b1' on page 4 undefined on input line 299.
+
+
+LaTeX Warning: Citation `b2' on page 4 undefined on input line 300.
+
+
+LaTeX Warning: Citation `b3' on page 4 undefined on input line 301.
+
+
+LaTeX Warning: Citation `b3' on page 4 undefined on input line 301.
+
+
+LaTeX Warning: Citation `b3' on page 4 undefined on input line 301.
+
+
+LaTeX Warning: Citation `b3' on page 4 undefined on input line 302.
+
+
+LaTeX Warning: Citation `b4' on page 4 undefined on input line 310.
+
+
+LaTeX Warning: Citation `b5' on page 4 undefined on input line 311.
+
+
+LaTeX Warning: Citation `b6' on page 4 undefined on input line 316.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 320--321
+[]\OT1/ptm/m/n/8 https://www.silabs.com/documents/public/quick-start-guides/qsg181-wi-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 321--322
+[]\OT1/ptm/m/n/8 https://www.silabs.com/documents/public/user-guides/ug495-wi-sun-
+ []
+
+c:/Users/rohan/OneDrive - International Institute of Information Technology (1)/summer'23/Submission/EV_charger/Paper/paper.tex:322: You can't use `macro parameter character #' in horizontal mode.
+l.322 ...e/1.0/about-the-simplicity-ide/overview/#
+                                                  project-explorer-view
+Sorry, but I'm not programmed to handle this case;
+I'll just pretend that you didn't ask for it.
+If you're in the wrong mode, you might be able to
+return to the right one by typing `I}' or `I$' or `I\par'.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 322--323
+[]\OT1/ptm/m/n/8 https://docs.silabs.com/simplicity-studio-5-users-guide/1.0/about-the-
+ []
+
+[4]
 
 ** Conference Paper **
 Before submitting the final camera ready copy, remember to:
@@ -307,19 +386,28 @@ Before submitting the final camera ready copy, remember to:
  uses only Type 1 fonts and that every step in the generation
  process uses the appropriate paper size.
 
-[4] (paper.aux) ) 
+[5
+
+] (paper.aux)
+
+LaTeX Warning: There were undefined references.
+
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+ ) 
 Here is how much of TeX's memory you used:
- 4344 strings out of 476361
- 69574 string characters out of 5788046
- 1872993 words of memory out of 5000000
- 24697 multiletter control sequences out of 15000+600000
- 563392 words of font info for 133 fonts, out of 8000000 for 9000
+ 4358 strings out of 476361
+ 69998 string characters out of 5788046
+ 1871993 words of memory out of 5000000
+ 24712 multiletter control sequences out of 15000+600000
+ 560535 words of font info for 126 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 57i,11n,62p,688b,304s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 57i,11n,62p,704b,304s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <C:/Users/rohan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/rohan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/rohan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Users/rohan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr7.pfb><C:/Users/rohan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/rohan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy7.pfb><C:/Users/rohan/AppData/Local/Programs/MiKTeX/fonts/type1/urw/courier/ucrr8a.pfb><C:/Users/rohan/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmb8a.pfb><C:/Users/rohan/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmbi8a.pfb><C:/Users/rohan/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmr8a.pfb><C:/Users/rohan/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmri8a.pfb>
-Output written on paper.pdf (4 pages, 140327 bytes).
+Output written on paper.pdf (5 pages, 144156 bytes).
 PDF statistics:
- 71 PDF objects out of 1000 (max. 8388607)
+ 74 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 

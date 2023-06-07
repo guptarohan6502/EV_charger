@@ -1,6 +1,6 @@
-PWD c:\Users\rohan\OneDrive - International Institute of Information Technology (1)\summer'23\Paper\Paper
+PWD c:\Users\rohan\OneDrive - International Institute of Information Technology (1)\summer'23\Submission\EV_charger\Paper
 INPUT C:\Users\rohan\AppData\Local\MiKTeX\miktex\data\le\pdftex\pdflatex.fmt
-INPUT c:\Users\rohan\OneDrive - International Institute of Information Technology (1)\summer'23\Paper\Paper\paper.tex
+INPUT c:\Users\rohan\OneDrive - International Institute of Information Technology (1)\summer'23\Submission\EV_charger\Paper\paper.tex
 OUTPUT paper.log
 INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\tex\latex\ieeetran\IEEEtran.cls
 INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\tex\latex\ieeetran\IEEEtran.cls
@@ -192,24 +192,12 @@ INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\tfm\public\amsfonts\sym
 INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\tfm\public\amsfonts\symbols\msbm7.tfm
 INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\tfm\public\amsfonts\symbols\msbm5.tfm
 INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\tfm\adobe\times\ptmr7t.tfm
-INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmr9.tfm
-INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmmi9.tfm
-INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmsy9.tfm
-INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\tfm\public\amsfonts\cmextra\cmex9.tfm
-INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\tfm\public\amsfonts\symbols\msam10.tfm
-INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\tfm\public\amsfonts\symbols\msbm10.tfm
-INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\tfm\adobe\times\ptmb7t.tfm
 INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\tfm\adobe\times\ptmrc7t.tfm
-INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\tfm\public\amsfonts\cmextra\cmex7.tfm
-INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\tfm\public\amsfonts\symbols\msam10.tfm
-INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\tfm\public\amsfonts\symbols\msam7.tfm
-INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\tfm\public\amsfonts\symbols\msbm10.tfm
-INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\tfm\public\amsfonts\symbols\msbm7.tfm
-INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\tex\latex\psnfss\ot1pcr.fd
-INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\tex\latex\psnfss\ot1pcr.fd
-INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\tex\latex\psnfss\ot1pcr.fd
-INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\tex\latex\psnfss\ot1pcr.fd
-INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\tfm\adobe\courier\pcrr7t.tfm
+INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\tex\latex\psnfss\ts1ptm.fd
+INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\tex\latex\psnfss\ts1ptm.fd
+INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\tex\latex\psnfss\ts1ptm.fd
+INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\tex\latex\psnfss\ts1ptm.fd
+INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\tfm\adobe\times\ptmr8c.tfm
 INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\vf\adobe\times\ptmr7t.vf
 INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\tfm\adobe\times\ptmr8r.tfm
 INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\vf\adobe\times\ptmr7t.vf
@@ -226,9 +214,20 @@ INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\vf\adobe\times\ptmbi7t.
 INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\tfm\adobe\times\ptmbi8r.tfm
 INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\vf\adobe\times\ptmb7t.vf
 INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\tfm\adobe\times\ptmb8r.tfm
+INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\vf\adobe\times\ptmrc7t.vf
+INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\vf\adobe\times\ptmr8c.vf
+INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\tfm\public\amsfonts\cmextra\cmex7.tfm
+INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\tfm\public\amsfonts\symbols\msam10.tfm
+INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\tfm\public\amsfonts\symbols\msam7.tfm
+INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\tfm\public\amsfonts\symbols\msbm10.tfm
+INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\tfm\public\amsfonts\symbols\msbm7.tfm
+INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\tex\latex\psnfss\ot1pcr.fd
+INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\tex\latex\psnfss\ot1pcr.fd
+INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\tex\latex\psnfss\ot1pcr.fd
+INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\tex\latex\psnfss\ot1pcr.fd
+INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\tfm\adobe\courier\pcrr7t.tfm
 INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\vf\adobe\times\ptmb7t.vf
 INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\tfm\adobe\times\ptmb8r.tfm
-INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\vf\adobe\times\ptmrc7t.vf
 INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\vf\adobe\times\ptmr7t.vf
 INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\tfm\adobe\times\ptmr8r.tfm
 INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\vf\adobe\times\ptmri7t.vf
@@ -240,8 +239,6 @@ INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\tex\latex\psnfss\omsptm.fd
 INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\tex\latex\psnfss\omsptm.fd
 INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\tex\latex\psnfss\omsptm.fd
 INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\tex\latex\psnfss\omsptm.fd
-INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\vf\adobe\times\ptmb7t.vf
-INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\tfm\adobe\times\ptmb8r.tfm
 INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\vf\adobe\times\ptmrc7t.vf
 INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\tfm\adobe\times\ptmr8r.tfm
 INPUT C:\Users\rohan\AppData\Local\Programs\MiKTeX\fonts\vf\adobe\times\ptmb7t.vf
