@@ -23,9 +23,9 @@ class ThreadWithReturnValue(threading.Thread):
         
  
  
-port = 6002
+port = 7002
 
-EV_UI_thread = threading.Thread(target=UI_ev.EV,args=(port,))
+EV_UI_thread = threading.Thread(target=UI_ev.EV,args=(port,port+1))
 sendtoBR_thread = threading.Thread(target= sendtoBR.sendBR,args = (port,))
 sendtoArd_thread = threading.Thread(target= sendtoArd.sendArduino,args = (port+1,))
 

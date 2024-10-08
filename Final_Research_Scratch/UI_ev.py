@@ -141,28 +141,28 @@ def get_amount(bike):
 
 
 # Charging function to simulate charging for 10 seconds
-def charging():
-    global window
+# def charging():
+    # global window
     
     
     
-   """
-   Error Codes:
-   1. Charging Completed Successfully
-   2. Power meter not working
-   3. Insufficient Balance
-   4. Invalid ID
-   5. Any other error
-   """ 
+   # """
+   # Error Codes:
+   # 1. Charging Completed Successfully
+   # 2. Power meter not working
+   # 3. Insufficient Balance
+   # 4. Invalid ID
+   # 5. Any other error
+   # """ 
    
    
 
-    try:
-        time.sleep(10)  # Simulate charging time of 10 seconds
-        return 1  # Charging success
-    except Exception as e:
-        print(f"Error in charging: {e}")
-        return 0  # Charging failed
+    # try:
+        # time.sleep(10)  # Simulate charging time of 10 seconds
+        # return 1  # Charging success
+    # except Exception as e:
+        # print(f"Error in charging: {e}")
+        # return 0  # Charging failed
 
 
 def but_startcharge(amount,bike):
