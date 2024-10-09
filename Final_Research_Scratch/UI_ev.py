@@ -9,6 +9,15 @@ warnings.filterwarnings("ignore")
 
 import Charger_script
 
+Emergency_vehicle_discovered = False
+
+def Emergency_status():
+    global Emergency_vehicle_discovered
+    time.sleep(10)
+    
+    Emergency_vehicle_discovered = False
+    return 1
+
 # Create a class to store the result
 class ThreadWithReturnValue(threading.Thread):
     def __init__(self, group=None, target=None, name=None, args=(), kwargs={}, Verbose=None):
@@ -23,18 +32,25 @@ class ThreadWithReturnValue(threading.Thread):
         threading.Thread.join(self, timeout)
         return self._return
 
-
 def read_Ard_serial():
     global Ard_serial_q
     global Ard_socks
     global cli_socks
-
+    
+    global Emergency_vehicle_discovered
+    
     while True:
         msg = Ard_socks.recv(1024).decode().strip()
 
         # Condition 1: Check if it is an emergency message
-        if "Emergency: Emergency Peripheral Discovered" in msg:
-            cli_socks.send(msg.encode())
+        if "Emergency:" in msg:
+            #print("EVscript: Emergency vehicle discvered")
+            if Emergency_vehicle_discovered == False:
+                print("EVscript: Emergency vehicle discvered")
+                cli_socks.send(("wisun socket_write 4 \"" + str((str(msg) + str(" Near Node 1")) + "\"\n")).encode())
+                Emergency_vehicle_status_thread = threading.Thread(target=Emergency_status)
+                Emergency_vehicle_discovered = True
+                Emergency_vehicle_status_thread.start()
 
         # Condition 2: Check if it is an EV_Bike message
         elif "EV_Bike:" in msg:
@@ -46,7 +62,6 @@ def read_Ard_serial():
         else:
             pass
 
-
 def read_socket():
     global socket_q
     global cli_socks
@@ -56,12 +71,10 @@ def read_socket():
         if msg:
             socket_q.append(msg.decode().strip())
 
-
 # Function to update the status label
 def update_status(message):
     global status_label
     status_label.config(text=message)
-
 
 # Function to handle Wi-SUN connection setup
 def setup_wisun():
@@ -81,7 +94,7 @@ def setup_wisun():
         if socket_q:
             read_string = socket_q.pop()
 
-        while ("IPv6 address" not in str(read_string)) and ("wisun.border_router = fd12:3456" not in str(read_string)):
+        while "IPv6 address" not in str(read_string) and "wisun.border_router = fd12:3456" not in str(read_string):
             if socket_q:
                 read_string = socket_q.pop()
             else:
@@ -131,7 +144,7 @@ def get_amount(bike):
             if amount < 0:  # Optional: Check for non-negative amount
                 raise ValueError("Amount must be a positive integer.")
             # Proceed to charging with the valid amount
-            but_startcharge(amount,bike)  # Call but_startcharge with the amount
+            but_startcharge(amount, bike)  # Call but_startcharge with the amount
         except ValueError:
             error_label.config(text="Invalid input. Please enter a positive integer.")
 
@@ -140,7 +153,6 @@ def get_amount(bike):
 
     window.update()  # Update the UI to show the amount entry screen
 
-        
 def check_rfid_valid(idtag_str):
     global start_time
     print(f"EVscript: Input give Validation started")
@@ -149,8 +161,8 @@ def check_rfid_valid(idtag_str):
     global cli_socks
     
     read_string = ""
-    cli_socks.send(("wisun socket_write 4 \""+idtag_str + "\"\n").encode())
-    print("EVscript: wisun socket_write 4 \""+idtag_str + "\"\n")
+    cli_socks.send(("wisun socket_write 4 \"" + idtag_str + "\"\n").encode())
+    print("EVscript: wisun socket_write 4 \"" + idtag_str + "\"\n")
     
     if socket_q:
         read_string = socket_q.popleft().strip()
@@ -169,10 +181,11 @@ def check_rfid_valid(idtag_str):
         return True
     elif "valid_not" in str(read_string):
         return False
-    elif"valid_insuff" in str(read_string):
+    elif "valid_insuff" in str(read_string):
         return "Low balance"
-    elif"valid_error" in str(read_string):
+    elif "valid_error" in str(read_string):
         return "Onem2m Not responding at the Moment"
+
 
 # Charging function to simulate charging for 10 seconds
 def charging(amount):
@@ -421,7 +434,8 @@ def EV(sock_port=6002, Ard_port=6003):
 
     read_Arduino_thread = threading.Thread(target=read_Ard_serial)
     read_Arduino_thread.start()
-
+    
+    
     # Create the main window
     window = tk.Tk()
     window.title("EV Charger")
