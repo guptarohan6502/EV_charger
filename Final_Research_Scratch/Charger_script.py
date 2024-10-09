@@ -178,11 +178,14 @@ def Charger(Rfid_valid, amount):
 
                 print(time.time() - start)
                 print("Charger: Done")
+            
                 GPIO.output(4, GPIO.LOW)
+                return 1
         finally:
             power = 0
             power_sensor.close()
             print("Charger: ok")
+            return 1
 
     elif Rfid_valid == False:
         print(f"Charger: VehicleidTag:  is not registered")

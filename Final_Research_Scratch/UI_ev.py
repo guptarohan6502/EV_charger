@@ -8,6 +8,9 @@ from collections import deque
 warnings.filterwarnings("ignore")
 
 import Charger_script
+import scan_rfid
+
+
 
 Emergency_vehicle_discovered = False
 
@@ -73,8 +76,14 @@ def read_socket():
 
 # Function to update the status label
 def update_status(message):
-    global status_label
-    status_label.config(text=message)
+    global window
+    
+    # Clear existing widgets in the window (but keep the status_label intact)
+    for widget in window.winfo_children():
+        widget.destroy()
+    # print(f"EVscript: label print {message}")
+    screen_label = tk.Label(window, text=message, font=("Helvetica", 16))
+    screen_label.pack(pady=100)
 
 # Function to handle Wi-SUN connection setup
 def setup_wisun():
@@ -126,8 +135,7 @@ def get_amount(bike):
 
     # Clear existing widgets in the window (but keep the status_label intact)
     for widget in window.winfo_children():
-        if widget != status_label:  # Preserve the status label for updating later
-            widget.destroy()
+        widget.destroy()
 
     amount_label = tk.Label(window, text="Enter amount (in integer):")
     amount_label.pack(pady=10)
@@ -153,6 +161,30 @@ def get_amount(bike):
 
     window.update()  # Update the UI to show the amount entry screen
 
+def get_ID():
+    global window, status_label
+
+    # Clear existing widgets in the window (but keep the status_label intact)
+    for widget in window.winfo_children():
+        widget.destroy()
+
+    amount_label = tk.Label(window, text="Enter ID:")
+    amount_label.pack(pady=10)
+
+    amount_entry = tk.Entry(window)
+    amount_entry.pack(pady=5)
+
+    error_label = tk.Label(window, text="", fg="red")
+    error_label.pack()
+
+    def submit_amount():
+        get_amount(None)
+         
+
+    submit_button = tk.Button(window, text="Submit", command=submit_amount)
+    submit_button.pack(pady=10)
+
+    window.update()  # Update the UI to show the amount entry screen
 def check_rfid_valid(idtag_str):
     global start_time
     print(f"EVscript: Input give Validation started")
@@ -237,28 +269,14 @@ def but_startcharge(amount,bike):
 
     # Perform the background steps
     try:
-        # Find the index of the bike in the bike details list (1-based indexing)
-        index = bike_details.index(bike) + 1 if bike and bike_details else 0  # Add proper handling
-
-        # Write the Arduino indexing to the Arduino socket
-        Ard_socks.send(str(index).encode())
-
-        time.sleep(2)
-        update_status("Charging in progress..")
-        window.update()
-
-        # Read two lines from the Arduino serial queue (peripheral name and address)
-        if len(Ard_serial_q) >= 2:
-            peripheral_name = Ard_serial_q.popleft().strip()
-            peripheral_address = Ard_serial_q.popleft().strip()
-
-            # Print peripheral details for reference
-            print(f"EV_script: Peripheral Name: {peripheral_name}")
-            print(f"EV_script: Peripheral Address: {peripheral_address}")
-
+        
+        if(bike == None):
+            update_status("Charging in progress..")
+            window.update()
             # Call the charging function
             charging_status = charging(amount)
-
+            
+            
             # Handle the post-charging process
             if charging_status == 1:
                 Ard_socks.send(b"DISCONNECT\n")
@@ -266,14 +284,48 @@ def but_startcharge(amount,bike):
             else:
                 Ard_socks.send(b"DISCONNECT\n")
                 update_status("Error: Charging failed")
-
+                
             # After showing the status, return to the scan screen
             window.after(2000, setup_scan_screen)
         else:
-            Ard_socks.send(str("DISCONNECT").encode())  # In case Arduino Bluetooth is connected
-            print("EV_script: Error: Not enough data in the queue to read peripheral details.")
-            update_status("Error: Could not retrieve peripheral details.")
-            window.after(2000, setup_scan_screen)
+            
+            # Find the index of the bike in the bike details list (1-based indexing)
+            index = bike_details.index(bike) + 1 if bike and bike_details else 0  # Add proper handling
+
+            # Write the Arduino indexing to the Arduino socket
+            Ard_socks.send(str(index).encode())
+
+            time.sleep(2)
+            update_status("Charging in progress..")
+            window.update()
+    
+            # Read two lines from the Arduino serial queue (peripheral name and address)
+            if len(Ard_serial_q) >= 2:
+                peripheral_name = Ard_serial_q.popleft().strip()
+                peripheral_address = Ard_serial_q.popleft().strip()
+
+                # Print peripheral details for reference
+                print(f"EV_script: Peripheral Name: {peripheral_name}")
+                print(f"EV_script: Peripheral Address: {peripheral_address}")
+
+                # Call the charging function
+                charging_status = charging(amount)
+
+                # Handle the post-charging process
+                if charging_status == 1:
+                    Ard_socks.send(b"DISCONNECT\n")
+                    update_status("Charging completed")
+                else:
+                    Ard_socks.send(b"DISCONNECT\n")
+                    update_status("Error: Charging failed")
+
+                # After showing the status, return to the scan screen
+                window.after(2000, setup_scan_screen)
+            else:
+                Ard_socks.send(str("DISCONNECT").encode())  # In case Arduino Bluetooth is connected
+                print("EV_script: Error: Not enough data in the queue to read peripheral details.")
+                update_status("Error: Could not retrieve peripheral details.")
+                window.after(2000, setup_scan_screen)
 
     except Exception as e:
         Ard_socks.send(str("DISCONNECT").encode())  # In case Arduino Bluetooth is connected
@@ -295,8 +347,7 @@ def display_bike_options():
 
     # Clear previous widgets except the status label
     for widget in window.winfo_children():
-        if widget != status_label:
-            widget.destroy()
+        widget.destroy()
 
     # Display bike buttons
     for bike in bike_details:
@@ -373,11 +424,12 @@ def setup_scan_screen():
 		widget.destroy()
 
 	scan_button = tk.Button(window, text="Scan for Bikes", command=send_scan_command, width=20)
-	scan_button.pack(pady=20)
+	scan_button.pack(pady=100)
+    
+	ID_button = tk.Button(window, text="Enter ID", command = get_ID,width=20)
+	ID_button.pack(pady=20)
 
-	global status_label
-	status_label = tk.Label(window, text=" ")
-	status_label.pack(pady=20)
+
    
 
 
@@ -439,14 +491,13 @@ def EV(sock_port=6002, Ard_port=6003):
     # Create the main window
     window = tk.Tk()
     window.title("EV Charger")
+    window.geometry("600x400")
 
     # Set up a button to initiate the Wi-SUN connection
     connect_button = tk.Button(window, text="Connect to Wi-SUN", command=start_connection, width=20)
     connect_button.pack(pady=20)
 
-    # Add a label for status updates
-    status_label = tk.Label(window, text="")
-    status_label.pack(pady=20)
+   
 
     # Start the Tkinter event loop
     window.mainloop()
