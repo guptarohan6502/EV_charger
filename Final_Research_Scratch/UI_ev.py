@@ -7,6 +7,7 @@ from collections import deque
 
 warnings.filterwarnings("ignore")
 
+import Charger_script
 
 # Create a class to store the result
 class ThreadWithReturnValue(threading.Thread):
@@ -139,30 +140,69 @@ def get_amount(bike):
 
     window.update()  # Update the UI to show the amount entry screen
 
+        
+def check_rfid_valid(idtag_str):
+    global start_time
+    print(f"EVscript: Input give Validation started")
+    print(f"EVscript: data being sent")
+    global socket_q
+    global cli_socks
+    
+    read_string = ""
+    cli_socks.send(("wisun socket_write 4 \""+idtag_str + "\"\n").encode())
+    print("EVscript: wisun socket_write 4 \""+idtag_str + "\"\n")
+    
+    if socket_q:
+        read_string = socket_q.popleft().strip()
+        print(f"read_string:{read_string}")
+    
+    while "valid" not in str(read_string):
+        if socket_q:
+            read_string = socket_q.popleft().strip()
+            print(f"read_string:{read_string}")
+        else:
+            continue
+        print("\r", f"Charger: waiting For Id validation", end='\r')
+    print(f"Charger: Validation done")
+
+    if "valid_yes" in str(read_string):
+        return True
+    elif "valid_not" in str(read_string):
+        return False
+    elif"valid_insuff" in str(read_string):
+        return "Low balance"
+    elif"valid_error" in str(read_string):
+        return "Onem2m Not responding at the Moment"
 
 # Charging function to simulate charging for 10 seconds
-# def charging():
-    # global window
+def charging(amount):
+    global window
     
     
+    """
+    Error Codes:
+    1. Charging Completed Successfully
+    2. Power meter not working
+    3. Insufficient Balance
+    4. Invalid ID
+    5. Any other error
+    """ 
     
-   # """
-   # Error Codes:
-   # 1. Charging Completed Successfully
-   # 2. Power meter not working
-   # 3. Insufficient Balance
-   # 4. Invalid ID
-   # 5. Any other error
-   # """ 
-   
-   
-
-    # try:
-        # time.sleep(10)  # Simulate charging time of 10 seconds
-        # return 1  # Charging success
-    # except Exception as e:
-        # print(f"Error in charging: {e}")
-        # return 0  # Charging failed
+    print(f"Amount: {amount}")
+    idtag_str = f"{{'Amount': {amount}, 'VehicleidTag': '12345678', 'Time': {time.time()}, 'Chargerid': 'EV-L001-03'}}"
+    try:
+        RFID_thread = ThreadWithReturnValue(target = check_rfid_valid, args=(idtag_str,))
+        RFID_thread.start()
+        Rfid_valid = RFID_thread.join(timeout = 60) # 1 minute to verify RFID
+            
+        print(Rfid_valid)
+        time.sleep(2)
+        charge_status = Charger_script.Charger(Rfid_valid,amount)
+        print(charge_status)
+        return charge_status
+    except Exception as e:
+        print(f"Error in charging: {e}")
+        return 0  # Charging failed
 
 
 def but_startcharge(amount,bike):
@@ -204,13 +244,13 @@ def but_startcharge(amount,bike):
             print(f"EV_script: Peripheral Address: {peripheral_address}")
 
             # Call the charging function
-            charging_status = charging()
+            charging_status = charging(amount)
 
             # Handle the post-charging process
             if charging_status == 1:
                 Ard_socks.send(b"DISCONNECT\n")
                 update_status("Charging completed")
-            elif charging_status == 0:
+            else:
                 Ard_socks.send(b"DISCONNECT\n")
                 update_status("Error: Charging failed")
 
