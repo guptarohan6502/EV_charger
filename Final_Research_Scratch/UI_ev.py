@@ -9,7 +9,7 @@ warnings.filterwarnings("ignore")
 
 import Charger_script
 import scan_rfid
-
+from keypad import KeypadUI
 
 
 Emergency_vehicle_discovered = False
@@ -426,7 +426,7 @@ def setup_scan_screen():
 	scan_button = tk.Button(window, text="Scan for Bikes", command=send_scan_command, width=20)
 	scan_button.pack(pady=100)
     
-	ID_button = tk.Button(window, text="Enter ID", command = get_ID,width=20)
+	ID_button = tk.Button(window, text="Enter ID", command = get_ID, width=20)
 	ID_button.pack(pady=20)
 
 
