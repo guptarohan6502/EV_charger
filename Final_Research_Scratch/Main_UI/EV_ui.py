@@ -1,13 +1,13 @@
 
-# EV_ui.py
-
 import tkinter as tk
 import socket
 import threading
 from collections import deque
 from keypad import Keypad
-from wisun_set_script import setup_wisun  # Import Wi-SUN setup function
-
+from wisun_set_script import setup_wisun
+import Arduino  # Import the Arduino.py functions
+import Charger_script
+import time
 
 # Create a class to store the result of threads
 class ThreadWithReturnValue(threading.Thread):
@@ -33,31 +33,67 @@ class MainApp:
         self.wisun_port = wisun_port
         self.arduino_port = arduino_port
 
-        # Create a socket object
+        # Set up the Wi-SUN socket
         self.cli_socks = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.cli_socks.connect((socket.gethostname(), self.wisun_port))  # Bind to the port
-        print("EVscript: Connected to local server.")
-
+        print("EVscript: Connected to Wi-SUN server.")
         self.wisun_socket_q = deque()
-        read_thread = threading.Thread(target=self.read_socket)
-        read_thread.start()
+        read_wisun_thread = threading.Thread(target=self.read_socket)
+        read_wisun_thread.start()
 
-        # Initially start with an empty frame
-        self.main_frame = tk.Frame(root)
-        self.main_frame.pack(expand=True)
+        # Emergency Vehicle
+        self.Emergency_vehicle_discovered = False
 
-        # Create the initial frame
+        # Set up the Arduino socket
+        self.arduino_socks = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.arduino_socks.connect((socket.gethostname(), self.arduino_port))  # Bind to the port
+        self.arduino_socket_q = deque()
+        read_arduino_thread = threading.Thread(target=self.read_Ard_serial)
+        read_arduino_thread.start()
+
+        # Create an initial frame
         self.show_initial_frame("Press '#' on the keypad to Connect")
+        self.current_frame = "wisun_connect"
+        self.accept_keypad_input = True
 
         # Start keypad input monitoring
         self.keypad = Keypad(self.process_keypad_input)
         self.start_keypad_listener()
 
     def read_socket(self):
+        """Function to read from sockets."""
         while True:
             msg = self.cli_socks.recv(1024)
             if msg:
                 self.wisun_socket_q.append(msg.decode().strip())
+
+    def Emergency_status(self):
+        time.sleep(10)
+        self.Emergency_vehicle_discovered = False
+        return 1
+
+    def read_Ard_serial(self):
+        while True:
+            msg = self.arduino_socks.recv(1024).decode().strip()
+
+            # Condition 1: Check if it is an emergency message
+            if "Emergency:" in msg:
+                if not self.Emergency_vehicle_discovered:
+                    print("EVscript: Emergency vehicle discovered")
+                    self.cli_socks.send(("wisun socket_write 4 \"" + str((str(msg) + str(" Near Node 1")) + "\"\n")).encode())
+                    self.Emergency_vehicle_status_thread = threading.Thread(target=self.Emergency_status)
+                    self.Emergency_vehicle_discovered = True
+                    self.Emergency_vehicle_status_thread.start()
+
+            # Condition 2: Check if it is an EV_Bike message
+            elif "EV_Bike:" in msg:
+                clean_msg = msg.replace("EV_Bike: ", "")
+                self.arduino_socket_q.append(clean_msg)
+                print("UIscript: Arduino q appended msg: " + clean_msg)
+
+            # Condition 3: If anything else, just ignore it
+            else:
+                pass
 
     def start_keypad_listener(self):
         """Run the keypad check loop in a separate thread."""
@@ -66,76 +102,201 @@ class MainApp:
         keypad_thread.start()
 
     def process_keypad_input(self, char):
-        """Handle the '#' input from the keypad to start Wi-SUN connection."""
-        if char == '#':
-            self.connect_to_wisun()
+        """Handle keypad input."""
+        print(f"UIsript: keypad is processing {char} input")
+        if self.accept_keypad_input:
+            if char == '#':
+                print("UIscript: # is pressed")
+                self.accept_keypad_input = False
+                if self.current_frame == "scanning_frame":
+                    self.send_scan_command()
+                elif self.current_frame == "ble_bikes":
+                    self.send_scan_command()
+                elif self.current_frame == "wisun_connect":
+                    self.connect_to_wisun()
+                else:
+                    self.send_scan_command()
+            elif char == 'C':
+                print("UIscript: C is pressed")
+                if self.current_frame == "ble_bikes":
+                    self.show_scanning_frame()
+                elif self.current_frame == "loading_screen":
+                    self.connect_to_wisun()
+                elif self.current_frame == "charging_frame":
+                    self.arduino_socks.send(b"DISCONNECT\n")
+                    self.send_scan_command()
+            elif char in ['1', '2', '3']:  # Select a bike if options are displayed
+                print(f"UIscript: char {char} is pressed")
+                bike_index = int(char) - 1
+                if bike_index < len(self.bike_details):
+                    self.handle_bike_selection(self.bike_details[bike_index])
 
     def update_status(self, message):
-        """Update the status label with the current message."""
+        """Update the status label."""
         self.status_label.config(text=message)
         self.root.update()
 
     def connect_to_wisun(self):
         """Trigger the Wi-SUN connection setup."""
         self.show_loading_frame("Connecting to Wi-SUN...")
-
-        # Run the Wi-SUN setup in a separate thread to avoid blocking the UI
         wisun_thread = threading.Thread(target=self.setup_wisun_and_update)
         wisun_thread.start()
-        
-    def show_initial_frame(self,msg):
-        """Show the initial frame with 'Connect to Wi-SUN' button and status label."""
-        self.clear_frame()
 
+    def show_initial_frame(self, msg):
+        """Show the initial frame with a status label."""
+        self.clear_frame()
         self.initial_frame = tk.Frame(self.root)
         self.initial_frame.pack(expand=True)
-
-        # Enter Input button to start Wi-SUN connection
-        self.wisun_button = tk.Button(self.initial_frame, text="Connect to Wi-SUN", font=("Helvetica", 16))
-        self.wisun_button.pack(pady=20)
-
-        # Status label to prompt user to press '#'
-        self.status_label = tk.Label(self.initial_frame, text= msg, font=("Helvetica", 10))
+        self.status_label = tk.Label(self.initial_frame, text=msg, font=("Helvetica", 10))
         self.status_label.pack(pady=20)
 
     def show_loading_frame(self, message):
-        """Show a loading frame while Wi-SUN is being set up."""
+        """Show a loading frame."""
         self.clear_frame()
         self.loading_frame = tk.Frame(self.root)
         self.loading_frame.pack(expand=True)
-
         self.loading_label = tk.Label(self.loading_frame, text=message, font=("Helvetica", 16))
+        self.accept_keypad_input = True
+        self.current_frame = "loading_screen"
         self.loading_label.pack(pady=100)
 
-    def show_scanning_frame(self):
-        """Show the frame for starting scanning after Wi-SUN setup."""
+    def show_scanning_frame(self, msg=""):
+        """Show the frame to scan for bikes."""
         self.clear_frame()
         self.scan_frame = tk.Frame(self.root)
         self.scan_frame.pack(expand=True)
-
-        # Start Scanning button
         self.scan_button = tk.Button(self.scan_frame, text="Start Scanning", font=("Helvetica", 16))
         self.scan_button.pack(pady=20)
+        self.status_label = tk.Label(self.scan_frame, text="Press '#' to scan for bikes.\n" + msg, font=("Helvetica", 10))
+        self.accept_keypad_input = True
+        self.current_frame = "scanning_frame"
+        self.status_label.pack(pady=20)
 
-        # Status label to prompt user to press '#'
-        self.scan_label = tk.Label(self.scan_frame, text="Press '#' on the keypad to start scanning", font=("Helvetica", 10))
-        self.scan_label.pack(pady=20)
-	
-        
+    def send_scan_command(self):
+        """Send the SCAN command to the Arduino."""
+        Arduino.send_scan_command(self.arduino_socks, self.arduino_socket_q, self.root, self.display_bike_options, self.show_scanning_frame)
+
+    def display_bike_options(self, bike_details):
+        """Display the bike options."""
+        self.bike_details = bike_details  # Save bike details for further reference
+        self.accept_keypad_input = True
+        self.current_frame = "ble_bikes"
+        Arduino.display_bike_options(self.bike_details, self.root, self.handle_bike_selection, self.show_scanning_frame)
+
+    def handle_bike_selection(self, bike):
+        """Handle the selected bike and start charging."""
+        self.show_loading_frame(f"Starting charging for {bike}...")
+        self.but_startcharge(bike)
+
+    def charger_func(self, amount):
+        """Simulates the charging process."""
+        print(f"Amount: {amount}")
+        idtag_str = f"{{'Amount': {amount}, 'VehicleidTag': '12345678', 'Time': {time.time()}, 'Chargerid': 'EV-L001-03'}}"
+        try:
+            Rfid_valid = True
+            print(f"RFID Validity: {Rfid_valid}")
+            time.sleep(2)  # Simulate charging time
+            charge_status = Charger_script.Charger(Rfid_valid, amount)
+            print(f"UIscript: Charging encountered status {charge_status}")
+            return charge_status
+        except Exception as e:
+            print(f"Error in charging: {e}")
+            return 5  # Error code
+
+    def but_startcharge(self, bike):
+        """Function to start charging."""
+        # Example charging function. Replace with your implementation.
+        print(f"Charging started for {bike}!")
+
+        amount = 100  # for testing purposes
+
+        if amount is None:
+            self.show_loading_frame("Error: Invalid amount. Please try again.")
+        else:
+            # Update the UI to show charging screen
+            self.clear_frame()
+            self.current_frame = "charging_frame"
+            self.accept_keypad_input = True
+
+            self.charging_frame = tk.Frame(self.root)
+            self.charging_frame.pack(expand=True)
+            self.charging_label = tk.Label(self.charging_frame, text="Charging in Progress....", font=("Helvetica", 10))
+            self.charging_label.pack(pady=20)
+            self.scan_button = tk.Button(self.charging_frame, text="Press C for cancel", font=("Helvetica", 16))
+            self.scan_button.pack(pady=20)
+
+            # Perform the background steps
+            try:
+                if bike is None:
+                    charging_status = self.charger_func(amount)
+                    # Handle the post-charging process
+                    if charging_status == 1:
+                        self.arduino_socks.send(b"DISCONNECT\n")
+                        self.show_charging_completed()
+                    else:
+                        self.arduino_socks.send(b"DISCONNECT\n")
+                        self.show_loading_frame("Error: Charging Failed")
+
+                else:
+                    # Find the index of the bike in the bike details list (1-based indexing)
+                    index = self.bike_details.index(bike) + 1 if bike and self.bike_details else 0
+
+                    # Write the Arduino indexing to the Arduino socket
+                    self.arduino_socks.send(str(index).encode())
+
+                    time.sleep(2)
+                    # Read two lines from the Arduino serial queue (peripheral name and address)
+                    if len(self.arduino_socket_q) >= 2:
+                        peripheral_name = self.arduino_socket_q.popleft().strip()
+                        peripheral_address = self.arduino_socket_q.popleft().strip()
+
+                        # Print peripheral details for reference
+                        print(f"EV_script: Peripheral Name: {peripheral_name}")
+                        print(f"EV_script: Peripheral Address: {peripheral_address}")
+
+                        # Call the charging function
+                        charging_status = self.charger_func(amount)
+
+                        # Handle the post-charging process
+                        if charging_status == 1:
+                            self.arduino_socks.send(b"DISCONNECT\n")
+                            self.show_charging_completed()
+                        else:
+                            self.arduino_socks.send(b"DISCONNECT\n")
+                            self.show_loading_frame("Error: Charging Failed")
+                    else:
+                        self.arduino_socks.send(b"DISCONNECT\n")
+                        print("EV_script: Error: Not enough data in the queue to read peripheral details.")
+                        self.show_loading_frame("Error: Could not retrieve peripheral details.")
+
+            except Exception as e:
+                self.arduino_socks.send(b"DISCONNECT\n")
+                print(f"EV_script: Error in but_startcharge: {e}")
+                self.show_loading_frame(f"Error: {e}")
+
+    def show_charging_completed(self):
+        """Display 'Charging Completed' for 2 seconds, then go back to the scanning frame."""
+        self.clear_frame()
+
+        # Show 'Charging Completed' message
+        self.charging_completed_frame = tk.Frame(self.root)
+        self.charging_completed_frame.pack(expand=True)
+        self.charging_completed_label = tk.Label(self.charging_completed_frame, text="Charging Completed", font=("Helvetica", 16))
+        self.charging_completed_label.pack(pady=20)
+
+        # Delay for 2 seconds before returning to the scanning frame
+        self.root.after(2000, self.show_scanning_frame)
+
     def setup_wisun_and_update(self):
         """Setup Wi-SUN and update the UI based on success or failure."""
-        #connected = setup_wisun(cli_socks=self.cli_socks, socket_q=self.wisun_socket_q)  # Call the setup function from wisun_set_script.py
-        
-        set_wisun_thread = ThreadWithReturnValue(target=setup_wisun, args = (self.cli_socks, self.wisun_socket_q,))
+        set_wisun_thread = ThreadWithReturnValue(target=setup_wisun, args=(self.cli_socks, self.wisun_socket_q))
         set_wisun_thread.start()
-        connected = set_wisun_thread.join(timeout=600)  # 10 minutes to setup Wi-SUN else BR not setup
+        connected = set_wisun_thread.join(timeout=600)  # Timeout in case Wi-SUN setup takes too long
 
-        
-        
         if connected:
-            self.show_scanning_frame()  # Show the scanning frame when setup is successful
+            self.show_scanning_frame()  # If Wi-SUN setup is successful, move to scanning
         else:
-            self.show_initial_frame("Failed to connect Wisun \n Press '#' on the keypad to Connect")
+            self.show_initial_frame("Failed to connect to Wi-SUN.\nPress '#' on the keypad to try again.")
 
     def clear_frame(self):
         """Clear all widgets from the main window."""

@@ -4,6 +4,7 @@
 import threading
 import time
 import send_to_BR  # Import the BR communication script
+import send_to_AR
 import EV_ui  # Import the UI script
 import tkinter as tk  # Add tkinter import here for root window creation
 
@@ -29,6 +30,9 @@ wisun_port = port
 # Start the BR communication thread
 sendBR_thread = threading.Thread(target=send_to_BR.sendBR, args=(port,))
 sendBR_thread.start()
+
+sendAR_thread = threading.Thread(target=send_to_AR.sendAR, args=(arduino_port,))
+sendAR_thread.start()
 
 # Adding a small delay to ensure BR communication is established before starting the UI
 time.sleep(2)

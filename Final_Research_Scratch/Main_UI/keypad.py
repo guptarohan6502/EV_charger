@@ -55,8 +55,8 @@ class Keypad:
 
     def handle_keypress(self, char):
         """Handle the keypress and invoke the callback if '#' is pressed."""
-        if char == '#':
-            self.on_submit(char)  # Trigger the connection when '#' is pressed
+        
+        self.on_submit(char)  # Trigger the connection when '#' is pressed
         # Reset key_pressed to allow for further input
         time.sleep(0.3)
         global key_pressed
