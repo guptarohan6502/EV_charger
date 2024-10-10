@@ -60,6 +60,9 @@ class MainApp:
         self.keypad = Keypad(self.process_keypad_input)
         self.start_keypad_listener()
 
+        # Define a bike
+        self.bike = None
+
     def read_socket(self):
         """Function to read from sockets."""
         while True:
@@ -80,7 +83,8 @@ class MainApp:
             if "Emergency:" in msg:
                 if not self.Emergency_vehicle_discovered:
                     print("EVscript: Emergency vehicle discovered")
-                    self.cli_socks.send(("wisun socket_write 4 \"" + str((str(msg) + str(" Near Node 1")) + "\"\n")).encode())
+                    self.cli_socks.send(
+                        ("wisun socket_write 4 \"" + str((str(msg) + str(" Near Node 1")) + "\"\n")).encode())
                     self.Emergency_vehicle_status_thread = threading.Thread(target=self.Emergency_status)
                     self.Emergency_vehicle_discovered = True
                     self.Emergency_vehicle_status_thread.start()
@@ -105,31 +109,44 @@ class MainApp:
         """Handle keypad input."""
         print(f"UIsript: keypad is processing {char} input")
         if self.accept_keypad_input:
-            if char == '#':
-                print("UIscript: # is pressed")
-                self.accept_keypad_input = False
-                if self.current_frame == "scanning_frame":
-                    self.send_scan_command()
-                elif self.current_frame == "ble_bikes":
-                    self.send_scan_command()
-                elif self.current_frame == "wisun_connect":
-                    self.connect_to_wisun()
+            if self.current_frame == "input_frame":
+                current_text = self.entry.get()
+                if char == '#':
+                    print(f"Submitted Input: {current_text}")
+                    self.entry.delete(0, tk.END)
+                    self.but_startcharge(int(current_text), self.bike)
+                elif char == 'C':
+                    self.entry.delete(0, tk.END)
                 else:
-                    self.send_scan_command()
-            elif char == 'C':
-                print("UIscript: C is pressed")
-                if self.current_frame == "ble_bikes":
-                    self.show_scanning_frame()
-                elif self.current_frame == "loading_screen":
-                    self.connect_to_wisun()
-                elif self.current_frame == "charging_frame":
-                    self.arduino_socks.send(b"DISCONNECT\n")
-                    self.send_scan_command()
-            elif char in ['1', '2', '3']:  # Select a bike if options are displayed
-                print(f"UIscript: char {char} is pressed")
-                bike_index = int(char) - 1
-                if bike_index < len(self.bike_details):
-                    self.handle_bike_selection(self.bike_details[bike_index])
+                    self.entry.insert(tk.END, char)
+            else:
+                if char == '#':
+                    print("UIscript: # is pressed")
+                    self.accept_keypad_input = False
+                    if self.current_frame == "scanning_frame":
+                        self.send_scan_command()
+                    elif self.current_frame == "ble_bikes":
+                        self.send_scan_command()
+                    elif self.current_frame == "wisun_connect":
+                        self.connect_to_wisun()
+                    else:
+                        self.send_scan_command()
+                elif char == 'C':
+                    self.accept_keypad_input = False
+                    print("UIscript: C is pressed")
+                    if self.current_frame == "ble_bikes":
+                        self.show_scanning_frame()
+                    elif self.current_frame == "loading_screen":
+                        self.connect_to_wisun()
+                    elif self.current_frame == "charging_frame":
+                        self.arduino_socks.send(b"DISCONNECT\n")
+                        self.send_scan_command()
+                elif char in ['1', '2', '3']:  # Select a bike if options are displayed
+                    self.accept_keypad_input = False
+                    print(f"UIscript: char {char} is pressed")
+                    bike_index = int(char) - 1
+                    if bike_index < len(self.bike_details):
+                        self.handle_bike_selection(self.bike_details[bike_index])
 
     def update_status(self, message):
         """Update the status label."""
@@ -174,7 +191,8 @@ class MainApp:
 
     def send_scan_command(self):
         """Send the SCAN command to the Arduino."""
-        Arduino.send_scan_command(self.arduino_socks, self.arduino_socket_q, self.root, self.display_bike_options, self.show_scanning_frame)
+        Arduino.send_scan_command(self.arduino_socks, self.arduino_socket_q, self.root, self.display_bike_options,
+                                  self.show_scanning_frame)
 
     def display_bike_options(self, bike_details):
         """Display the bike options."""
@@ -186,7 +204,40 @@ class MainApp:
     def handle_bike_selection(self, bike):
         """Handle the selected bike and start charging."""
         self.show_loading_frame(f"Starting charging for {bike}...")
-        self.but_startcharge(bike)
+        self.bike = bike
+        self.show_input_frame()
+
+    def show_input_frame(self):
+        """We will take amount input in this frame"""
+        self.clear_frame()
+
+        self.input_amount_frame = tk.Frame(self.root)
+        self.input_amount_frame.pack(expand=True)
+
+        # Create an entry widget to display input
+        self.entry = tk.Entry(self.input_amount_frame, width=20, font=("Helvetica", 16))
+        self.entry.pack(pady=20)
+
+        # Create a label for instructions
+        label = tk.Label(self.input_amount_frame, text="Enter input via keypad", font=("Helvetica", 16))
+        label.pack(pady=10)
+
+        buttons = [
+            ["1", "2", "3", "A"],
+            ["4", "5", "6", "B"],
+            ["7", "8", "9", "C"],
+            ["*", "0", "#", "D"]
+        ]
+
+        for row in buttons:
+            button_row = tk.Frame(self.input_amount_frame)
+            button_row.pack()
+            for char in row:
+                btn = tk.Button(button_row, text=char, font=("Helvetica", 16))
+                btn.pack(side=tk.LEFT)
+
+        self.current_frame = "input_frame"
+        self.accept_keypad_input = True
 
     def charger_func(self, amount):
         """Simulates the charging process."""
@@ -203,12 +254,9 @@ class MainApp:
             print(f"Error in charging: {e}")
             return 5  # Error code
 
-    def but_startcharge(self, bike):
+    def but_startcharge(self, amount, bike):
         """Function to start charging."""
-        # Example charging function. Replace with your implementation.
         print(f"Charging started for {bike}!")
-
-        amount = 100  # for testing purposes
 
         if amount is None:
             self.show_loading_frame("Error: Invalid amount. Please try again.")
@@ -243,7 +291,7 @@ class MainApp:
 
                     # Write the Arduino indexing to the Arduino socket
                     self.arduino_socks.send(str(index).encode())
-
+                    self.bike = None
                     time.sleep(2)
                     # Read two lines from the Arduino serial queue (peripheral name and address)
                     if len(self.arduino_socket_q) >= 2:
