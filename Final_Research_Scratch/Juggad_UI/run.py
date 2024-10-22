@@ -53,11 +53,13 @@ def is_arduino(port):
                 print("Done")
                 return True
             else:
+                ser.close()
                 print(f"Unexpected response: {response}")
         else:
+            ser.close()
             print(f"No response from device on port {port}.")
 
-        ser.close()
+    
         return False
 
     except (serial.SerialException, Exception) as e:

@@ -26,7 +26,8 @@ class ThreadWithReturnValue(threading.Thread):
 class MainApp:
     def __init__(self, root, wisun_port, arduino_port):
         self.root = root
-        self.root.geometry("600x400")
+        #self.root.geometry("600x400")
+        self.root.attributes('-fullscreen', True)
         self.root.title("EV Charger Wi-SUN Connection")
 
         self.wisun_port = wisun_port
@@ -107,6 +108,7 @@ class MainApp:
     def process_keypad_input(self, char):
         """Handle keypad input."""
         print(f"UIscript: keypad is processing {char} input")
+        print(f"UIscript: current frame is: {self.current_frame}")
         if self.accept_keypad_input:
             if self.current_frame == "input_frame":
                 current_text = self.entry.get()
@@ -186,9 +188,9 @@ class MainApp:
         self.initial_frame.pack(expand=True)
         self.current_frame = "wisun_connect"
         self.accept_keypad_input = True
-        self.wisun_connect_button = tk.Button(self.initial_frame, text="Connect to Wisun..(#)", font=("Helvetica", 16))
+        self.wisun_connect_button = tk.Button(self.initial_frame, text="Connect to Wisun..(#)", font=("Helvetica",40))
         self.wisun_connect_button.pack(pady=20)
-        self.status_label = tk.Label(self.initial_frame, text=msg, font=("Helvetica", 10))
+        self.status_label = tk.Label(self.initial_frame, text=msg, font=("Helvetica", 25))
         self.status_label.pack(pady=20)
 
     def show_loading_frame(self, message):
@@ -196,7 +198,7 @@ class MainApp:
         self.clear_frame()
         self.loading_frame = tk.Frame(self.root)
         self.loading_frame.pack(expand=True)
-        self.loading_label = tk.Label(self.loading_frame, text=message + " (#)", font=("Helvetica", 16))
+        self.loading_label = tk.Label(self.loading_frame, text=message + " (#)", font=("Helvetica", 40))
         self.accept_keypad_input = True
         self.current_frame = "loading_screen"
         self.loading_label.pack(pady=100)
@@ -206,11 +208,11 @@ class MainApp:
         self.clear_frame()
         self.scan_frame = tk.Frame(self.root)
         self.scan_frame.pack(expand=True)
-        self.scan_button = tk.Button(self.scan_frame, text="Start Scanning (1)", font=("Helvetica", 16))
+        self.scan_button = tk.Button(self.scan_frame, text="Start Scanning (1)", font=("Helvetica", 40))
         self.scan_button.pack(pady=20)
-        self.enter_id_button = tk.Button(self.scan_frame, text="Enter ID manually (2)", font=("Helvetica", 16))
+        self.enter_id_button = tk.Button(self.scan_frame, text="Enter ID manually (2)", font=("Helvetica", 40))
         self.enter_id_button.pack(pady=20)
-        self.status_label = tk.Label(self.scan_frame, text="Press '#' to scan for bikes.\n" + msg, font=("Helvetica", 10))
+        self.status_label = tk.Label(self.scan_frame, text="Press '#' to scan for bikes.\n" + msg, font=("Helvetica", 25))
         self.accept_keypad_input = True
         self.current_frame = "scanning_frame"
         self.status_label.pack(pady=20)
@@ -223,11 +225,11 @@ class MainApp:
         self.get_id_frame.pack(expand=True)
 
         # Create an entry widget to display the entered ID
-        self.entry = tk.Entry(self.get_id_frame, width=20, font=("Helvetica", 16))
+        self.entry = tk.Entry(self.get_id_frame, width=20, font=("Helvetica", 40))
         self.entry.pack(pady=20)
 
         # Create a label for instructions
-        label = tk.Label(self.get_id_frame, text="Enter bike ID via keypad", font=("Helvetica", 16))
+        label = tk.Label(self.get_id_frame, text="Enter bike ID via keypad", font=("Helvetica", 40))
         label.pack(pady=10)
 
         buttons = [
@@ -241,7 +243,7 @@ class MainApp:
             button_row = tk.Frame(self.get_id_frame)
             button_row.pack()
             for char in row:
-                btn = tk.Button(button_row, text=char, font=("Helvetica", 16))
+                btn = tk.Button(button_row, text=char, font=("Helvetica", 40))
                 btn.pack(side=tk.LEFT)
 
         self.current_frame = "get_id_frame"
@@ -255,6 +257,7 @@ class MainApp:
     def display_bike_options(self, bike_details):
         """Display the bike options."""
         self.bike_details = bike_details  # Save bike details for further reference
+        print("UIscript: Trying to display bike options")
         self.accept_keypad_input = True
         self.current_frame = "ble_bikes"
         Arduino.display_bike_options(self.bike_details, self.root, self.handle_bike_selection, self.show_scanning_frame)
@@ -273,11 +276,11 @@ class MainApp:
         self.input_amount_frame.pack(expand=True)
 
         # Create an entry widget to display input
-        self.entry = tk.Entry(self.input_amount_frame, width=20, font=("Helvetica", 16))
+        self.entry = tk.Entry(self.input_amount_frame, width=20, font=("Helvetica", 40))
         self.entry.pack(pady=20)
 
         # Create a label for instructions
-        label = tk.Label(self.input_amount_frame, text="Enter amount via keypad", font=("Helvetica", 16))
+        label = tk.Label(self.input_amount_frame, text="Enter amount via keypad", font=("Helvetica", 40))
         label.pack(pady=10)
 
         buttons = [
@@ -291,7 +294,7 @@ class MainApp:
             button_row = tk.Frame(self.input_amount_frame)
             button_row.pack()
             for char in row:
-                btn = tk.Button(button_row, text=char, font=("Helvetica", 16))
+                btn = tk.Button(button_row, text=char, font=("Helvetica", 25))
                 btn.pack(side=tk.LEFT)
 
         self.current_frame = "input_frame"
@@ -302,30 +305,30 @@ class MainApp:
         print(f"EVscript: data being sent")
 
         read_string = ""
-        self.cli_socks.send(("wisun socket_write 4 \"" + idtag_str + "\"\n").encode())
-        print("EVscript: wisun socket_write 4 \"" + idtag_str + "\"\n")
+        # self.cli_socks.send(("wisun socket_write 4 \"" + idtag_str + "\"\n").encode())
+        # print("EVscript: wisun socket_write 4 \"" + idtag_str + "\"\n")
 
-        if self.wisun_socket_q:
-            read_string = self.wisun_socket_q.popleft().strip()
-            print(f"read_string:{read_string}")
+        # if self.wisun_socket_q:
+            # read_string = self.wisun_socket_q.popleft().strip()
+            # print(f"read_string:{read_string}")
 
-        while "valid" not in str(read_string):
-            if self.wisun_socket_q:
-                read_string = self.wisun_socket_q.popleft().strip()
-                print(f"read_string:{read_string}")
-            else:
-                continue
-            print("\r", f"Charger: waiting For ID validation", end='\r')
-        print(f"Charger: Validation done")
+        # while "valid" not in str(read_string):
+            # if self.wisun_socket_q:
+                # read_string = self.wisun_socket_q.popleft().strip()
+                # print(f"read_string:{read_string}")
+            # else:
+                # continue
+            # print("\r", f"Charger: waiting For ID validation", end='\r')
+        # print(f"Charger: Validation done")
 
-        if "valid_yes" in str(read_string):
-            return True
-        elif "valid_not" in str(read_string):
-            return False
-        elif "valid_insuff" in str(read_string):
-            return "Low balance"
-        elif "valid_error" in str(read_string):
-            return "OneM2M Not responding at the moment"
+        #if "valid_yes" in str(read_string):
+        return True
+        # elif "valid_not" in str(read_string):
+            # return False
+        # elif "valid_insuff" in str(read_string):
+            # return "Low balance"
+        # elif "valid_error" in str(read_string):
+            # return "OneM2M Not responding at the moment"
 
     def charger_func(self, amount):
         """Simulates the charging process."""
@@ -358,9 +361,9 @@ class MainApp:
 
             self.charging_frame = tk.Frame(self.root)
             self.charging_frame.pack(expand=True)
-            self.charging_label = tk.Label(self.charging_frame, text="Charging in Progress....", font=("Helvetica", 10))
+            self.charging_label = tk.Label(self.charging_frame, text="Charging in Progress....", font=("Helvetica", 25))
             self.charging_label.pack(pady=20)
-            self.scan_button = tk.Button(self.charging_frame, text="Cancel (C)", font=("Helvetica", 16))
+            self.scan_button = tk.Button(self.charging_frame, text="Cancel (C)", font=("Helvetica", 40))
             self.scan_button.pack(pady=20)
 
             # Perform the background steps
@@ -419,7 +422,7 @@ class MainApp:
         # Show 'Charging Completed' message
         self.charging_completed_frame = tk.Frame(self.root)
         self.charging_completed_frame.pack(expand=True)
-        self.charging_completed_label = tk.Label(self.charging_completed_frame, text="Charging Completed", font=("Helvetica", 16))
+        self.charging_completed_label = tk.Label(self.charging_completed_frame, text="Charging Completed", font=("Helvetica", 40))
         self.charging_completed_label.pack(pady=20)
 
         # Delay for 2 seconds before returning to the scanning frame
@@ -429,7 +432,7 @@ class MainApp:
         """Setup Wi-SUN and update the UI based on success or failure."""
         set_wisun_thread = ThreadWithReturnValue(target=setup_wisun, args=(self.cli_socks, self.wisun_socket_q))
         set_wisun_thread.start()
-        connected = set_wisun_thread.join(timeout=600)  # Timeout in case Wi-SUN setup takes too long
+        connected = set_wisun_thread.join(timeout=60000)  # Timeout in case Wi-SUN setup takes too long
 
         if connected:
             self.show_scanning_frame()  # If Wi-SUN setup is successful, move to scanning
