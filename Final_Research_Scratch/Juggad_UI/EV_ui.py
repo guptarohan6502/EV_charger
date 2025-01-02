@@ -34,12 +34,12 @@ class MainApp:
         self.arduino_port = arduino_port
 
         # Set up the Wi-SUN socket
-        self.cli_socks = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.cli_socks.connect((socket.gethostname(), self.wisun_port))  # Bind to the port
-        print("EVscript: Connected to Wi-SUN server.")
-        self.wisun_socket_q = deque()
-        read_wisun_thread = threading.Thread(target=self.read_socket)
-        read_wisun_thread.start()
+        #self.cli_socks = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        #self.cli_socks.connect((socket.gethostname(), self.wisun_port))  # Bind to the port
+        #print("EVscript: Connected to Wi-SUN server.")
+        #self.wisun_socket_q = deque()
+        #read_wisun_thread = threading.Thread(target=self.read_socket)
+        #read_wisun_thread.start()
 
         # Emergency Vehicle
         self.Emergency_vehicle_discovered = False
@@ -109,6 +109,7 @@ class MainApp:
         """Handle keypad input."""
         print(f"UIscript: keypad is processing {char} input")
         print(f"UIscript: current frame is: {self.current_frame}")
+        print(f"vale of accept{self.accept_keypad_input}")
         if self.accept_keypad_input:
             if self.current_frame == "input_frame":
                 current_text = self.entry.get()
@@ -135,7 +136,7 @@ class MainApp:
                 if char == '1':
                     self.accept_keypad_input = False
                     self.send_scan_command()
-                elif char == '2':
+                else:
                     self.accept_keypad_input = False
                     self.show_get_id_frame()
             else:
@@ -152,6 +153,7 @@ class MainApp:
                         self.send_scan_command()
                 elif char == 'C':
                     self.accept_keypad_input = False
+                    
                     print("UIscript: C is pressed")
                     if self.current_frame == "ble_bikes":
                         self.show_scanning_frame()
@@ -208,11 +210,11 @@ class MainApp:
         self.clear_frame()
         self.scan_frame = tk.Frame(self.root)
         self.scan_frame.pack(expand=True)
-        self.scan_button = tk.Button(self.scan_frame, text="Start Scanning (1)", font=("Helvetica", 40))
+        self.scan_button = tk.Button(self.scan_frame, text="Connect via BLE", font=("Helvetica", 40))
         self.scan_button.pack(pady=20)
-        self.enter_id_button = tk.Button(self.scan_frame, text="Enter ID manually (2)", font=("Helvetica", 40))
-        self.enter_id_button.pack(pady=20)
-        self.status_label = tk.Label(self.scan_frame, text="Press '#' to scan for bikes.\n" + msg, font=("Helvetica", 25))
+        #self.enter_id_button = tk.Button(self.scan_frame, text="Enter ID manually (3)", font=("Helvetica", 40))
+        #self.enter_id_button.pack(pady=20)
+        #self.status_label = tk.Label(self.scan_frame, text="Press '#' to scan for bikes.\n" + msg, font=("Helvetica", 25))
         self.accept_keypad_input = True
         self.current_frame = "scanning_frame"
         self.status_label.pack(pady=20)
@@ -229,7 +231,7 @@ class MainApp:
         self.entry.pack(pady=20)
 
         # Create a label for instructions
-        label = tk.Label(self.get_id_frame, text="Enter bike ID via keypad", font=("Helvetica", 40))
+        label = tk.Label(self.get_id_frame, text="Enter User-ID", font=("Helvetica", 40))
         label.pack(pady=10)
 
         buttons = [
@@ -259,6 +261,7 @@ class MainApp:
         self.bike_details = bike_details  # Save bike details for further reference
         print("UIscript: Trying to display bike options")
         self.accept_keypad_input = True
+        self.accept_keypad_input = True
         self.current_frame = "ble_bikes"
         Arduino.display_bike_options(self.bike_details, self.root, self.handle_bike_selection, self.show_scanning_frame)
 
@@ -280,7 +283,7 @@ class MainApp:
         self.entry.pack(pady=20)
 
         # Create a label for instructions
-        label = tk.Label(self.input_amount_frame, text="Enter amount via keypad", font=("Helvetica", 40))
+        label = tk.Label(self.input_amount_frame, text="Enter Amount", font=("Helvettica", 40))
         label.pack(pady=10)
 
         buttons = [
@@ -430,7 +433,7 @@ class MainApp:
 
     def setup_wisun_and_update(self):
         """Setup Wi-SUN and update the UI based on success or failure."""
-        set_wisun_thread = ThreadWithReturnValue(target=setup_wisun, args=(self.cli_socks, self.wisun_socket_q))
+        set_wisun_thread = ThreadWithReturnValue(target=setup_wisun)
         set_wisun_thread.start()
         connected = set_wisun_thread.join(timeout=60000)  # Timeout in case Wi-SUN setup takes too long
 

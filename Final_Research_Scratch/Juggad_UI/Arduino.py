@@ -72,8 +72,8 @@ def display_bike_options(bike_details, root, callback_select_bike, callback_back
         btn.pack(pady=20)
 
     # Add a Back button to go back to the scan screen
-    back_btn = tk.Button(root, text="Back", font=("Helvetica", 40),command=callback_back_to_scan_screen)
-    back_btn.pack(pady=40)
+    back_btn = tk.Button(root, text="Connected to User-01", font=("Helvetica", 40),command=callback_back_to_scan_screen)
+    back_btn.pack(pady=200)
 
 
 def handle_bike_selection(bike, root, callback_start_charging):

@@ -103,7 +103,7 @@ print(f"Detected Arduino on port: {arduino_ser_port}")
 #print(f"Detected Wi-SUN on port: {wisun_ser_port}")
 
 # Define ports
-port = 6012
+port = 6009
 arduino_port = port + 1
 wisun_port = port
 
