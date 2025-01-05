@@ -86,11 +86,13 @@ def find_ports():
     print(f"Available ACM ports: {acm_ports}")	
     for port in acm_ports:
         if is_arduino(port.device):
-            arduino_port = port.device  # Save the Arduino port
+            arduino_ser_port = port.device  # Save the Arduino port
+        else:
+            wisun_ser_port = port.device
             
       
 
-    return arduino_port, None
+    return arduino_ser_port, wisun_ser_port
 
 # Detect the Arduino and Wi-SUN ports
 arduino_ser_port, wisun_ser_port = find_ports()
@@ -103,13 +105,13 @@ print(f"Detected Arduino on port: {arduino_ser_port}")
 #print(f"Detected Wi-SUN on port: {wisun_ser_port}")
 
 # Define ports
-port = 5010
+port = 7010
 arduino_port = port + 1
 wisun_port = port
 
 # Start the BR communication thread for Wi-SUN
-#sendBR_thread = threading.Thread(target=send_to_BR.sendBR, args=(wisun_ser_port, wisun_port,))
-#sendBR_thread.start()
+sendBR_thread = threading.Thread(target=send_to_BR.sendBR, args=(wisun_ser_port, wisun_port,))
+sendBR_thread.start()
 
 # Start the AR communication thread for Arduino
 sendAR_thread = threading.Thread(target=send_to_AR.sendAR, args=(arduino_ser_port, arduino_port,))

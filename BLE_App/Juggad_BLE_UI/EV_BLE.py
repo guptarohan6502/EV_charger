@@ -1,4 +1,3 @@
-
 import tkinter as tk
 import socket
 import threading
@@ -23,7 +22,6 @@ class ThreadWithReturnValue(threading.Thread):
         threading.Thread.join(self, timeout)
         return self._return
 
-
 class MainApp:
     def __init__(self, root, wisun_port, arduino_port):
         self.root = root
@@ -40,33 +38,27 @@ class MainApp:
         self.arduino_socks.connect((socket.gethostname(), self.arduino_port))
         self.arduino_socket_q = deque()
 
+        # Start thread to read Arduino messages
+        threading.Thread(target=self.read_Ard_serial, daemon=True).start()
 
-        read_arduino_thread = threading.Thread(target=self.read_Ard_serial)
-        read_arduino_thread.start()
-
-        # Show the initial frame first
-        self.show_initial_frame("Connecting to Wisun...", light="Y")
-
-        # Perform Wi-SUN setup in a separate thread
-        setup_thread = threading.Thread(target=self.setup_wisun_and_update)
-        setup_thread.start()
-        
+        # Start the setup process
+        threading.Thread(target=self.setup_process, daemon=True).start()
 
     def read_Ard_serial(self):
         while True:
             time.sleep(0.5)
-            msg = self.arduino_socks.recv(1024).decode().strip()
-
-            if "Emergency:" in msg:
-                if not self.Emergency_vehicle_discovered:
-                    print("EVscript: Emergency vehicle discovered")
-                    self.Emergency_vehicle_discovered = True
-                    threading.Thread(target=self.reset_emergency_status).start()
-
-            elif "APP" in msg:
-                #lean_msg = msg.replace("EV_Bike: ", "")
-                self.arduino_socket_q.append(msg)
-                print(f"UIscript: Arduino q appended msg: {msg}")
+            try:
+                msg = self.arduino_socks.recv(1024).decode().strip()
+                if "Emergency:" in msg:
+                    if not self.Emergency_vehicle_discovered:
+                        print("EVscript: Emergency vehicle discovered")
+                        self.Emergency_vehicle_discovered = True
+                        threading.Thread(target=self.reset_emergency_status, daemon=True).start()
+                elif "APP" in msg:
+                    self.arduino_socket_q.append(msg)
+                    print(f"UIscript: Arduino q appended msg: {msg}")
+            except Exception as e:
+                print(f"Error reading from Arduino: {e}")
 
     def reset_emergency_status(self):
         time.sleep(10)
@@ -102,78 +94,84 @@ class MainApp:
         explanation_frame.pack(pady=10)
 
         tk.Label(explanation_frame, text="Green - Available for connection", font=("Helvetica", 15)).pack(anchor="w")
-        tk.Label(explanation_frame, text="Yellow - Connecting to Wisun", font=("Helvetica", 15)).pack(anchor="w")
+        tk.Label(explanation_frame, text="Yellow - Connecting to Wi-SUN", font=("Helvetica", 15)).pack(anchor="w")
         tk.Label(explanation_frame, text="Red - Busy", font=("Helvetica", 15)).pack(anchor="w")
-    
-    
+
     def check_rfid_valid(self, idtag_str):
         print(f"EVscript: Input Validation started")
-        print(f"EVscript: data being sent")
-
-        read_string = ""
-        # self.cli_socks.send(("wisun socket_write 4 \"" + idtag_str + "\"\n").encode())
-        # print("EVscript: wisun socket_write 4 \"" + idtag_str + "\"\n")
-
-        # if self.wisun_socket_q:
-            # read_string = self.wisun_socket_q.popleft().strip()
-            # print(f"read_string:{read_string}")
-
-        # while "valid" not in str(read_string):
-            # if self.wisun_socket_q:
-                # read_string = self.wisun_socket_q.popleft().strip()
-                # print(f"read_string:{read_string}")
-            # else:
-                # continue
-            # print("\r", f"Charger: waiting For ID validation", end='\r')
-        # print(f"Charger: Validation done")
-
-        #if "valid_yes" in str(read_string):
-        return True
-        # elif "valid_not" in str(read_string):
-            # return False
-        # elif "valid_insuff" in str(read_string):
-            # return "Low balance"
-        # elif "valid_error" in str(read_string):
-    
-    def charger_func(self, Creds_to_verify):
-        """Simulates the charging process."""
-        print(f"Creds: {Creds_to_verify}")
-        idtag_str = f"{{'Amount': {Creds_to_verify[2]}, 'VehicleidTag': {Creds_to_verify[1]}, 'Time': {time.time()}, 'Chargerid': 'EV-L001-03'}}"
         try:
+            time.sleep(2)
+            return True  # Assume validation succeeds
+        except Exception as e:
+            print(f"Error in RFID validation: {e}")
+            return False
+
+    def charger_func(self, creds_to_verify):
+        print(f"Creds: {creds_to_verify}")
+        idtag_str = f"{{'Amount': {creds_to_verify[2]}, 'VehicleidTag': {creds_to_verify[1]}, 'Time': {time.time()}, 'Chargerid': 'EV-L001-03'}}"
+        try:
+            # Start a background thread to verify RFID
             RFID_thread = ThreadWithReturnValue(target=self.check_rfid_valid, args=(idtag_str,))
             RFID_thread.start()
-            Rfid_valid = RFID_thread.join(timeout=60)  # 1 minute to verify RFID
+            Rfid_valid = RFID_thread.join(timeout=60)  # Wait up to 1 minute for RFID verification
+            
             print(f"RFID Validity: {Rfid_valid}")
+            if not Rfid_valid:
+                print("Error: Invalid RFID.")
+                return 5  # Error code for RFID failure
+            else:
+                self.arduino_socks.send(b"ANDROID: OK\n")
+
             time.sleep(2)  # Simulate charging time
-            charge_status = Charger_script.Charger(Rfid_valid, amount)
+            
+            # Perform the charging operation
+            charge_status = Charger_script.Charger(Rfid_valid, creds_to_verify[2],self.arduino_socket_q,self.arduino_socks)
             print(f"UIscript: Charging encountered status {charge_status}")
+            if charge_status ==1:
+                self.arduino_socks.send(b"ANDROID: PRG_1.0\n")
             return charge_status
         except Exception as e:
             print(f"Error in charging: {e}")
-            return 5  # Error code
-            
-            
-    def Connect_to_BLE_User(self):
-        User_ID = Arduino.read_central_connection(self.arduino_socket_q)
-        self.show_initial_frame("Busy", light="R")
-        PIN,Amount = Arduino.app_communication(self.arduino_socket_q, self.arduino_socks)
-        Creds_to_verify = [User_ID, PIN, Amount]
-        print(Creds_to_verify)
-        return Creds_to_verify 
-    
-    def setup_wisun_and_update(self):
-        set_wisun_thread = ThreadWithReturnValue(target=setup_wisun)
-        set_wisun_thread.start()
-        self.wisun_connected = set_wisun_thread.join(timeout=60)
+            return 5  # General error code
 
-        if self.connected:
-            print("Wi-SUN Connected!")
+
+    def connect_to_ble_user(self):
+        try:
+            user_id = Arduino.read_central_connection(self.arduino_socket_q)
+            self.show_initial_frame("Busy", light="R")
+            pin, amount = Arduino.app_communication(self.arduino_socket_q, self.arduino_socks)
+            return [user_id, pin, amount]
+        except Exception as e:
+            print(f"Error in connect_to_ble_user: {e}")
+            return None
+
+    def setup_process(self):
+        self.show_initial_frame("Connecting to Wi-SUN...", light="Y")
+        try:
+            wisun_connected = setup_wisun()
+            if wisun_connected:
+                print("Wi-SUN Connected!")
+                self.show_initial_frame("Wi-SUN Connected!", light="G")
+                self.main_loop()
+            else:
+                print("Failed to connect to Wi-SUN.")
+                self.show_initial_frame("Failed to connect to Wi-SUN. Press '#' to retry.", light="R")
+        except Exception as e:
+            print(f"Error during Wi-SUN setup: {e}")
+            self.show_initial_frame("Error in setup. Retrying...", light="R")
+            time.sleep(2)
+            self.setup_process()
+
+    def main_loop(self):
+        while True:
             self.show_initial_frame("Wi-SUN Connected!", light="G")
-            self.Connect_to_BLE_User()
-            
-        else:
-            print("Failed to connect to Wi-SUN")
-            self.show_initial_frame("Failed to connect to Wi-SUN. Press '#' to retry.", light="R")
+            creds = self.connect_to_ble_user()
+            if creds:
+                charge_status = self.charger_func(creds)
+                print(f"Charge status: {charge_status}")
+                self.arduino_socks.send(b"ANDROID: Disconnect\n")
+            else:
+                print("Reconnecting to BLE User...")
 
     def clear_frame(self):
         for widget in self.root.winfo_children():
