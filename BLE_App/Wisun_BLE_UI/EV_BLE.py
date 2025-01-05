@@ -59,6 +59,7 @@ class MainApp:
         """Function to read from sockets."""
         while True:
             msg = self.wisun_socks.recv(1024)
+            print("Wisun socket ka data:" + str(msg))
             if msg:
                 self.wisun_socket_q.append(msg.decode().strip())
     
