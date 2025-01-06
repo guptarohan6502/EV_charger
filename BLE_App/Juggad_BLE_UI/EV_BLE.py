@@ -25,7 +25,8 @@ class ThreadWithReturnValue(threading.Thread):
 class MainApp:
     def __init__(self, root, wisun_port, arduino_port):
         self.root = root
-        self.root.geometry("600x400")
+        #self.root.geometry("600x400")
+        self.root.attributes('-fullscreen', True)
         self.root.title("EV Charger Wi-SUN Connection")
 
         # Initialize variables
