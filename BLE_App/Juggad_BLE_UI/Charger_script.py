@@ -154,9 +154,9 @@ def Charger(Rfid_valid, amount, arduino_socket_q, arduino_socks):
                 print("Charger: Charging started")
                 GPIO.output(4, GPIO.HIGH)
                 time.sleep(0.1)
-                power = 500  # Placeholder for power_sensor.readPower()
+                power = 100  # Placeholder for power_sensor.readPower()
                 while power <= 0:
-                    power = 500  # power_sensor.readPower()
+                    power = 100  # power_sensor.readPower()
 
                 energy_cons = 0
                 energy_cons = power * (time.time() - start)

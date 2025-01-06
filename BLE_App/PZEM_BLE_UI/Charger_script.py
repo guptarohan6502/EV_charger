@@ -4,11 +4,12 @@ import RPi.GPIO as GPIO
 import time
 import serial
 import struct
+from collections import deque  # for example usage of arduino_socket_q
 
 # Create a class to store the result
 class ThreadWithReturnValue(threading.Thread):
     def __init__(self, group=None, target=None, name=None, args=(), kwargs={}, Verbose=None):
-        threading.Thread.__init__(self, group, target, name, args, kwargs)
+        super().__init__(group=group, target=target, name=name, args=args, kwargs=kwargs)
         self._return = None
 
     def run(self):
@@ -16,21 +17,20 @@ class ThreadWithReturnValue(threading.Thread):
             self._return = self._target(*self._args, **self._kwargs)
 
     def join(self, timeout=None):
-        threading.Thread.join(self, timeout)
+        super().join(timeout)
         return self._return
 
 class PZEM:
-
-    setAddrBytes = [0xB4, 0xC0, 0xA8, 0x01, 0x01, 0x00, 0x1E]
-    readVoltageBytes = [0xB0, 0xC0, 0xA8, 0x01, 0x01, 0x00, 0x1A]
-    readCurrentBytes = [0xB1, 0xC0, 0xA8, 0x01, 0x01, 0x00, 0x1B]
-    readPowerBytes = [0xB2, 0xC0, 0xA8, 0x01, 0x01, 0x00, 0x1C]
-    readRegPowerBytes = [0xB3, 0xC0, 0xA8, 0x01, 0x01, 0x00, 0x1D]
+    setAddrBytes       = [0xB4, 0xC0, 0xA8, 0x01, 0x01, 0x00, 0x1E]
+    readVoltageBytes   = [0xB0, 0xC0, 0xA8, 0x01, 0x01, 0x00, 0x1A]
+    readCurrentBytes   = [0xB1, 0xC0, 0xA8, 0x01, 0x01, 0x00, 0x1B]
+    readPowerBytes     = [0xB2, 0xC0, 0xA8, 0x01, 0x01, 0x00, 0x1C]
+    readRegPowerBytes  = [0xB3, 0xC0, 0xA8, 0x01, 0x01, 0x00, 0x1D]
 
     # dmesg | grep tty       list Serial linux command
 
-    def __init__(self, com="/dev/ttyUSB0", timeout=10.0):       # USB serial port
-        # Alternative constructors for different serial ports
+    def __init__(self, com="/dev/ttyUSB0", timeout=10.0):  # USB serial port
+        # Alternative constructors for different serial ports:
         # def __init__(self, com="/dev/ttyAMA0", timeout=10.0):  # Raspberry Pi port Serial TTL
         # def __init__(self, com="/dev/rfcomm0", timeout=10.0):
 
@@ -117,7 +117,6 @@ class PZEM:
     def close(self):
         self.ser.close()
 
-
 def Charger(Rfid_valid, amount, arduino_socket_q, arduino_socks):
     """
     Error Codes:
@@ -126,21 +125,26 @@ def Charger(Rfid_valid, amount, arduino_socket_q, arduino_socks):
     3. Insufficient Balance
     4. Invalid ID
     5. Any other error
+    6. Incomplete charging (user disconnected mid-charge)
     """
 
     print(Rfid_valid, amount)
     amount = int(amount)
+
+    # First try to open the PZEM sensor
     try:
         power_sensor = PZEM()
     except:
-        return 2
+        # If we can't open the sensor, return error code 2
+        return [2, None]
 
     costperunit = 10
     unit_1 = 3600  # ideally 36000000
 
+    # Now check the user’s RFID status
     if Rfid_valid == True:
         GPIO.setmode(GPIO.BCM)
-        print(f"Total unit you get = {int(amount) / costperunit}")
+        print(f"Total unit you get = {amount / costperunit}")
 
         netunit = amount / costperunit
         netenergy = netunit * unit_1
@@ -149,65 +153,73 @@ def Charger(Rfid_valid, amount, arduino_socket_q, arduino_socks):
         Incomplete_charging = False
 
         print("Charger: Checking readiness")
-        if True:
+        # Wrap the charging logic in a try/finally so we always close the sensor
+        try:
             print("Charger: Charging started")
             GPIO.output(4, GPIO.HIGH)
             time.sleep(0.1)
+
             power = power_sensor.readPower()
-            print("Charger:" + str(power))
+            print("Charger:", power)
+
+            # Wait until power reading is positive (meaning the sensor sees load)
             while power <= 0:
                 power = power_sensor.readPower()
 
-            energy_cons = 0
             energy_cons = power * (time.time() - start)
-            print(f"Charger: power={power}")
-            print('\n')
+            print(f"Charger: power={power}\n")
 
-            last_percentage_sent = 0.0  # Track the last percentage sent to avoid redundant messages
+            last_percentage_sent = 0.0  # Track the last percentage to avoid redundant messages
 
             while energy_cons < netenergy:
-                # Calculate percentage of energy consumed
                 percentage_completed = energy_cons / netenergy
 
-                if arduino_socket_q:
+                # Check any message from the queue (e.g., "disconnect")
+                if arduino_socket_q and len(arduino_socket_q) > 0:
                     msg = arduino_socket_q.popleft().strip()
                     print(f"CHARGER: {msg}")
-
                     if "disconnect" in msg.lower():
                         Incomplete_charging = True
                         print("Charger: Disconnect message received, stopping charging")
                         percentage_completed = energy_cons / netenergy
-                        print(f"Charger: Incomplete charging, charging completed is {percentage_completed}%")
+                        print(f"Charger: Incomplete charging, charging completed: {percentage_completed:.2%}")
                         break
 
-                # Only send updates when the percentage increases by 0.1 (10%)
+                # Send updates every 10% progress
                 if percentage_completed - last_percentage_sent >= 0.1:
                     last_percentage_sent = round(percentage_completed, 1)
                     message = f"ANDROID: PRG_{last_percentage_sent:.1f}\n"
                     arduino_socks.send(message.encode())
                     print(f"Charger: Sent progress update: {message}")
 
-                print("\r", f"Charger: units_cons = {energy_cons / unit_1: .2f}", end='\r')
+                # Print progress in the console
+                print(f"\rCharger: units_cons = {energy_cons / unit_1:.2f}", end='')
+                time.sleep(0.2)  # Add a small pause for demonstration
+
+                # Update energy consumed
                 energy_cons = power * (time.time() - start)
 
-            print(time.time() - start)
+            print("\n", time.time() - start)
             print("Charger: Done")
 
             GPIO.output(4, GPIO.LOW)
             return [1, None]
 
-        try:
-            print("Hello")
         finally:
-            power = power_sensor.close()
-            print("Charger: ok")
+            # Always close sensor
+            power_sensor.close()
+            print("Charger: PZEM closed")
+
+            # If the loop ended due to "disconnect", we come here
             if Incomplete_charging:
-                return [6, round(percentage_completed, 2)]
+                # 6 indicates incomplete charging
+                return [6, round((energy_cons / netenergy) * 100, 2)]
             else:
+                # If we completed normally or hit an exception
                 return [1, None]
 
     elif Rfid_valid == False:
-        print(f"Charger: VehicleidTag:  is not registered")
+        print("Charger: VehicleidTag is not registered")
         return [4, None]
 
     elif Rfid_valid == "Low balance":
@@ -215,5 +227,5 @@ def Charger(Rfid_valid, amount, arduino_socket_q, arduino_socks):
         return [3, None]
 
     else:
-        print("Charger: " + Rfid_valid)
+        print("Charger:", Rfid_valid)
         return [5, None]
