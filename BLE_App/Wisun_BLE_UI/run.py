@@ -119,7 +119,7 @@ if __name__ == '__main__':
     #print(f"Detected Wi-SUN on port: {wisun_ser_port}")
 
     # Define ports
-    port = 6010
+    port = 7010
     arduino_port = port + 1
     wisun_port = port
 

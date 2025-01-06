@@ -71,13 +71,21 @@ class MainApp:
         self.clear_frame()
 
         self.initial_frame = tk.Frame(self.root)
+        # Make this frame occupy the entire window
         self.initial_frame.pack(fill="both", expand=True)
 
-        # Traffic light frame
-        traffic_frame = tk.Frame(self.initial_frame)
-        traffic_frame.pack(pady=20)
+        # Create a container frame that we place in the center
+        container = tk.Frame(self.initial_frame)
+        # relx=0.5, rely=0.5 means "center of the window";
+        # anchor="center" means the container's (0,0) is pinned to the center
+        container.place(relx=0.5, rely=0.5, anchor="center")
+
+        # Traffic light frame (goes inside the container)
+        traffic_frame = tk.Frame(container)
+        traffic_frame.pack(pady=20)  # Stack vertically inside container
 
         def get_led_color(led, current_light):
+            # Dim vs. bright LED colors
             if led == current_light:
                 return {"G": "#00FF00", "Y": "#FFFF00", "R": "#FF0000"}.get(led, "#808080")
             return {"G": "#008000", "Y": "#808000", "R": "#800000"}.get(led, "#808080")
@@ -90,15 +98,19 @@ class MainApp:
         tk.Label(traffic_frame, width=10, height=5, bg=yellow_color).pack(side="left", padx=10)
         tk.Label(traffic_frame, width=10, height=5, bg=red_color).pack(side="left", padx=10)
 
-        self.status_label = tk.Label(self.initial_frame, text=msg, font=("Helvetica", 25))
+        # Status label
+        self.status_label = tk.Label(container, text=msg, font=("Helvetica", 25))
         self.status_label.pack(pady=20)
 
-        explanation_frame = tk.Frame(self.initial_frame)
+        # Explanation frame
+        explanation_frame = tk.Frame(container)
         explanation_frame.pack(pady=10)
 
         tk.Label(explanation_frame, text="Green - Available for connection", font=("Helvetica", 15)).pack(anchor="w")
         tk.Label(explanation_frame, text="Yellow - Connecting to Wi-SUN", font=("Helvetica", 15)).pack(anchor="w")
         tk.Label(explanation_frame, text="Red - Busy", font=("Helvetica", 15)).pack(anchor="w")
+
+
 
     def check_rfid_valid(self, idtag_str):
         print(f"EVscript: Input Validation started")
