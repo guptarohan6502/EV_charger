@@ -70,7 +70,9 @@ class MainApp:
                 msg = self.arduino_socks.recv(1024).decode().strip()
                 if "Emergency:" in msg:
                     if not self.Emergency_vehicle_discovered:
+                        msg = "Emergency Vehicle Discovered"
                         print("EVscript: Emergency vehicle discovered")
+                        self.wisun_socks.send(("wisun socket_write 4 \"" + str((str(msg) + str(" Near Node Charger EV-L001-04")) + "\"\n")).encode())
                         self.Emergency_vehicle_discovered = True
                         threading.Thread(target=self.reset_emergency_status, daemon=True).start()
                 elif "APP" in msg:
@@ -142,8 +144,8 @@ class MainApp:
                 print(f"read_string:{read_string}")
             else:
                 continue
-            print("\r", f"Charger: waiting For ID validation", end='\r')
-        print(f"Charger: Validation done")
+            print("\r", f"EVscriptr: waiting For ID validation", end='\r')
+        print(f"EVscript: Validation done")
 
         if "valid_yes" in str(read_string):
             return True
@@ -171,12 +173,25 @@ class MainApp:
                 self.arduino_socks.send(b"ANDROID: OK\n")
 
             time.sleep(2)  # Simulate charging time
-            
+            Incomplete_percentage = None
             # Perform the charging operation
-            charge_status = Charger_script.Charger(Rfid_valid, creds_to_verify[2],self.arduino_socket_q,self.arduino_socks)
-            print(f"UIscript: Charging encountered status {charge_status}")
+            Return_status = Charger_script.Charger(Rfid_valid, creds_to_verify[2],self.arduino_socket_q,self.arduino_socks)
+            charge_status = Return_status[0]
+            Incomplete_percentage = 1-Return_status[1]
+            if(Incomplete_percentage):
+                print(f"EVscript: Charging was completed only {1-Incomplete_percentage} %")
+            print(f"EVscript: Charging encountered status {charge_status}")
             if charge_status ==1:
                 self.arduino_socks.send(b"ANDROID: PRG_1.0\n")
+                # time.sleep(0.1)
+                # self.arduino_socks.send(b"Disconnect")
+            elif charge_status == 6:
+                print(f"EVscript: Posting latest data due to incomplete charging.")
+                idtag_str = f"{{'Amount': {str(int(-1*(Incomplete_percentage)*int(creds_to_verify[2])))}, 'VehicleidTag': {creds_to_verify[1]}, 'Time': {time.time()}, 'Chargerid': 'EV-L001-04'}}"
+                RFID_thread = ThreadWithReturnValue(target=self.check_rfid_valid, args=(idtag_str,))
+                RFID_thread.start()
+                Rfid_valid = RFID_thread.join(timeout=10)  # Wait up to 10 sec to post updated data
+                
             return charge_status
         except Exception as e:
             print(f"Error in charging: {e}")

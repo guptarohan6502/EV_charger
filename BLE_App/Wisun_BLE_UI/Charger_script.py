@@ -137,6 +137,7 @@ def Charger(Rfid_valid, amount, arduino_socket_q, arduino_socks):
 
     costperunit = 10
     unit_1 = 3600  # ideally 36000000
+    
 
     if Rfid_valid == True:
         GPIO.setmode(GPIO.BCM)
@@ -146,7 +147,7 @@ def Charger(Rfid_valid, amount, arduino_socket_q, arduino_socks):
         netenergy = netunit * unit_1
         GPIO.setup(4, GPIO.OUT)
         start = time.time()
-
+        Incomplete_charging = False
         try:
             print("Charger: Checking readiness")
             if True:
@@ -167,6 +168,17 @@ def Charger(Rfid_valid, amount, arduino_socket_q, arduino_socks):
                 while energy_cons < netenergy:
                     # Calculate percentage of energy consumed
                     percentage_completed = energy_cons / netenergy
+                    
+                    if arduino_socket_q:
+                        msg = arduino_socket_q.popleft().strip()
+                        print(f"CHARGER: {msg}")
+
+                        if "disconnect" in msg.lower():
+                            Incomplete_charging = True
+                            print("Charger: Disconnect message received, stopping charging")
+                            percentage_completed = energy_cons / netenergy
+                            print(f"Charger: Incomplete charging, charging completed is {percentage_completed}%")
+                            break
 
                     # Only send updates when the percentage increases by 0.1 (10%)
                     if percentage_completed - last_percentage_sent >= 0.1:
@@ -190,21 +202,26 @@ def Charger(Rfid_valid, amount, arduino_socket_q, arduino_socks):
                 print("Charger: Done")
             
                 GPIO.output(4, GPIO.LOW)
-                return 1
+                return [1,None]
         finally:
             power = 0
             # power_sensor.close()
             print("Charger: ok")
-            return 1
+            if(Incomplete_charging):
+                return [6, round(percentage_completed, 2)]
+            else:
+                return [1,None]
 
     elif Rfid_valid == False:
         print(f"Charger: VehicleidTag:  is not registered")
-        return 4
+        return [4,None]
 
     elif Rfid_valid == "Low balance":
         print("Charger: User has low balance. Kindly recharge")
-        return 3
+        return [3,None]
 
     else:
         print("Charger: " + Rfid_valid)
-        return 5
+        return [5,None]
+
+
