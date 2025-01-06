@@ -107,7 +107,7 @@ def start_ui():
       
       
 if __name__ == '__main__':
-    time.sleep(60)
+    time.sleep(5)
     # Detect the Arduino and Wi-SUN ports
     arduino_ser_port, wisun_ser_port = find_ports()
 
