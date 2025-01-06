@@ -94,37 +94,48 @@ def find_ports():
 
     return arduino_ser_port, wisun_ser_port
 
-# Detect the Arduino and Wi-SUN ports
-arduino_ser_port, wisun_ser_port = find_ports()
-
-if arduino_ser_port is None:
-    print("Error: Could not detect both Arduino and Wi-SUN devices.")
-    exit(1)
-
-print(f"Detected Arduino on port: {arduino_ser_port}")
-#print(f"Detected Wi-SUN on port: {wisun_ser_port}")
-
-# Define ports
-port = 6010
-arduino_port = port + 1
-wisun_port = port
-
-# Start the BR communication thread for Wi-SUN
-sendBR_thread = threading.Thread(target=send_to_BR.sendBR, args=(wisun_ser_port, wisun_port,))
-sendBR_thread.start()
-
-# Start the AR communication thread for Arduino
-sendAR_thread = threading.Thread(target=send_to_AR.sendAR, args=(arduino_ser_port, arduino_port,))
-sendAR_thread.start()
-
-# Adding a small delay to ensure BR communication is established before starting the UI
-time.sleep(2)
 
 # Initialize the Tkinter root window and start the EV UI thread
 def start_ui():
-    root = tk.Tk()  # Create the root window here
-    app = EV_BLE.MainApp(root, wisun_port, arduino_port)  # Pass the root window to the MainApp
-    root.mainloop()  # Start the Tkinter main loop
+    try:
+        root = tk.Tk()  # Create the root window here
+        app = EV_BLE.MainApp(root, wisun_port, arduino_port)  # Pass the root window to the MainApp
+        root.mainloop()  # Start the Tkinter main loop
+    except Exception as e:
+      print(f"Waiting for GUI to become available: {e}")
+      time.sleep(0.2) # Small delay, not needed but recommended
+      
+      
+if __name__ == '__main__':
+    time.sleep(60)
+    # Detect the Arduino and Wi-SUN ports
+    arduino_ser_port, wisun_ser_port = find_ports()
 
-EV_BLE_thread = threading.Thread(target=start_ui)
-EV_BLE_thread.start()
+    if arduino_ser_port is None:
+        print("Error: Could not detect both Arduino and Wi-SUN devices.")
+        exit(1)
+
+    print(f"Detected Arduino on port: {arduino_ser_port}")
+    #print(f"Detected Wi-SUN on port: {wisun_ser_port}")
+
+    # Define ports
+    port = 6010
+    arduino_port = port + 1
+    wisun_port = port
+
+    # Start the BR communication thread for Wi-SUN
+    sendBR_thread = threading.Thread(target=send_to_BR.sendBR, args=(wisun_ser_port, wisun_port,))
+    sendBR_thread.start()
+
+    # Start the AR communication thread for Arduino
+    sendAR_thread = threading.Thread(target=send_to_AR.sendAR, args=(arduino_ser_port, arduino_port,))
+    sendAR_thread.start()
+
+    # Adding a small delay to ensure BR communication is established before starting the UI
+    time.sleep(2)
+
+
+
+    EV_BLE_thread = threading.Thread(target=start_ui)
+    EV_BLE_thread.start()
+
