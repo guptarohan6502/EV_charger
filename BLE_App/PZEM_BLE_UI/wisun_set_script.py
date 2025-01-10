@@ -35,13 +35,13 @@ def setup_wisun():
 
     try:
         # Send Wi-SUN join commands through the socket
-        time.sleep(0.25)
+        
         #cli_socks.send(b"wisun get wisun\n")
         time.sleep(0.25)
         #cli_socks.send(b"wisun join_fan11\n")
         time.sleep(0.5)
         print("Wisun_set_script: done")
-        time.sleep(1)
+        time.sleep(20)
         return True
         # if socket_q:
             # read_string = socket_q.pop()

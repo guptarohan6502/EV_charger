@@ -152,7 +152,7 @@ class MainApp:
                 # self.arduino_socks.send(b"Disconnect")
             elif charge_status == 6:
                 print(f"EVscript: Posting latest data due to incomplete charging.")
-                idtag_str = f"{{'Amount': {str(int(-1*(Incomplete_percentage)*int(creds_to_verify[2])))}, 'VehicleidTag': {creds_to_verify[1]}, 'Time': {time.time()}, 'Chargerid': 'EV-L001-04'}}"
+                idtag_str = f"{{'Amount': {str(int(-1*(Incomplete_percentage)*int(creds_to_verify[2])))}, 'VehicleidTag': {creds_to_verify[1]}, 'Time': {time.time()}, 'Chargerid': 'EV-L001-1'}}"
                 RFID_thread = ThreadWithReturnValue(target=self.check_rfid_valid, args=(idtag_str,))
                 RFID_thread.start()
                 Rfid_valid = RFID_thread.join(timeout=10)  # Wait up to 10 sec to post updated data

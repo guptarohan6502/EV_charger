@@ -68,7 +68,7 @@ def app_communication(arduino_socket_q, arduino_socks, stop_event=None, timeout=
                 line = line.split("APP:")[1].strip()
                 print(f"AR: Received line: {line}")
 
-                if line == "Start":
+                if line == "Start".lower():
                     print("AR: Received 'Start' from Arduino.")
                     if arduino_socks:
                         arduino_socks.send(b"ANDROID: Please Enter Amount\n")
