@@ -177,7 +177,9 @@ def Charger(Rfid_valid, amount, arduino_socket_q, arduino_socks):
                             Incomplete_charging = True
                             print("Charger: Disconnect message received, stopping charging")
                             percentage_completed = energy_cons / netenergy
-                            print(f"Charger: Incomplete charging, charging completed is {percentage_completed}%")
+                            print(f"Charger: Incomplete charging, charging completed: {percentage_completed:.2%}")
+                            GPIO.output(4, GPIO.HIGH)
+                            time.sleep(0.1)
                             break
 
                     # Only send updates when the percentage increases by 0.1 (10%)
