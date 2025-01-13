@@ -203,6 +203,8 @@ def Charger(Rfid_valid, amount, arduino_socket_q, arduino_socks):
 
             print("\n", time.time() - start)
             print("Charger: Done")
+            message = f"ANDROID: PRG_1.0\n"
+            arduino_socks.send(message.encode())
 
             GPIO.output(4, GPIO.LOW)
             return [1, None]
