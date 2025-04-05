@@ -150,8 +150,8 @@ def verify_transaction(msg):
 
     unit_price, charger_name = get_unit_price(charger_list, msg)
     print(unit_price)
-    print(charger_list)
-    print(User_list)
+    #print(charger_list)
+    #print(User_list)
     
     msg["VehicleidTag"] = '7053'
 
@@ -226,27 +226,27 @@ def verify_transaction(msg):
             
 if __name__ == '__main__':
     msg = {
-        "Amount": 100,
+        "Amount": 500,
         "VehicleidTag": "7053",
-        "Time": time.time(),
-        "Chargerid": "EV-L001-04"
+        "Time": 1736527292,
+        "Chargerid": "EV-L001-1"
     }
      
     charger_name = msg["Chargerid"]
     unit_price =10
 
     #  # Format Txn_data
-    # Txn_data = [
-    #     int(msg["Time"]),
-    #     msg["VehicleidTag"],
-    #     charger_name,
-    #     msg["Amount"],
-    #     unit_price,
-    #     round(msg["Amount"] / unit_price, 2),
-    #     100000000
-    # ]
-    # post_txn_data(Node="AE-EV",device='USER',user="USER-01", data=Txn_data)
+    Txn_data = [
+        int(1736168966),
+        msg["VehicleidTag"],
+        charger_name,
+        msg["Amount"],
+        unit_price,
+        round(msg["Amount"] / unit_price, 2),
+        100000
+    ]
+    post_txn_data(Node="AE-EV",device='USER',user="USER-02", data=Txn_data)
 
-    verify_transaction(msg)
+    #verify_transaction(msg)
     # unit_price, charger_name = get_unit_price(get_chargers(), msg)
     # print(unit_price, charger_name)
