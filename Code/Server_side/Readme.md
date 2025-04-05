@@ -1,0 +1,3 @@
+commands to run
+sudo wsbrd -F example/wsbrd.conf -u /dev/ttyACM0
+sudo ip -6 address add fd12:3456::1/64 dev tun0
